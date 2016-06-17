@@ -35,19 +35,25 @@ def load_osv_smeta(sheet: xlrd.sheet.Sheet):
 
 def load_osv_1c(sheet: xlrd.sheet.Sheet):
     sheet_dict = OrderedDict()
+    current_kfo = None
     current_acc = None
     for i in range(12, sheet.nrows):
         row = sheet.row_values(i)
         key = row[0]
         row = [0.0 if not item else item for item in (row[3], row[6], row[9], row[14], row[16], row[19])]
         if isinstance(key, float):
-            key = str(int(key))
+            key = key
         else:
-            key = key.strip()
+            key = key
 
         print(repr(key), row)
         if key == 'Итого':
             break
+        elif isinstance(key, float):
+            if current_kfo is None or key == current_kfo + 1:
+                current_kfo = int(key)
+        else:
+            pass
 
 
 wb = xlrd.open_workbook(r'c:\Users\ret\YandexDisk\ОСВ Тихвинский сс\OSV_VED_1.xls', formatting_info=True)
