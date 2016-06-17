@@ -33,7 +33,30 @@ def load_osv_smeta(sheet: xlrd.sheet.Sheet):
     return sheet_dict
 
 
-rb = xlrd.open_workbook(r'c:\Users\ret\YandexDisk\ОСВ Тихвинский сс\OSV_VED_1.xls', formatting_info=True)
-sheet = rb.sheet_by_index(0)
+def load_osv_1c(sheet: xlrd.sheet.Sheet):
+    sheet_dict = OrderedDict()
+    current_acc = None
+    for i in range(12, sheet.nrows):
+        row = sheet.row_values(i)
+        key = row[0]
+        row = [0.0 if not item else item for item in (row[3], row[6], row[9], row[14], row[16], row[19])]
+        if isinstance(key, float):
+            key = str(int(key))
+        else:
+            key = key.strip()
 
-print(json.dumps(load_osv_smeta(sheet), indent=2))
+        print(repr(key), row)
+        if key == 'Итого':
+            break
+
+
+wb = xlrd.open_workbook(r'c:\Users\ret\YandexDisk\ОСВ Тихвинский сс\OSV_VED_1.xls', formatting_info=True)
+sheet = wb.sheet_by_index(0)
+
+osv_smeta = json.dumps(load_osv_smeta(sheet), indent=2)
+
+wb = xlrd.open_workbook(r'c:\Users\ret\YandexDisk\ОСВ Тихвинский сс\Тихвинский ОСВ - после свертки.xls',
+                        formatting_info=True)
+sheet = wb.sheet_by_index(0)
+
+load_osv_1c(sheet)
