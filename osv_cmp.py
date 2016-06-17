@@ -1,6 +1,6 @@
+import json
 from collections import OrderedDict
 
-import json
 import xlrd
 
 
@@ -10,7 +10,7 @@ def load_osv_smeta(sheet: xlrd.sheet.Sheet):
     for i in range(8, sheet.nrows):
         row = sheet.row_values(i)
         key = row[0].strip()
-        # print(repr(key), row[1:])
+
         parts = key.count('.') + 1
         if key.startswith('Итого'):
             break
@@ -24,7 +24,7 @@ def load_osv_smeta(sheet: xlrd.sheet.Sheet):
             key = ''.join(key.split('.'))
 
             if len(key) == 20:
-                assert key.startswith('000')
+                assert key.startswith('000'), "20-digit KBK started not from 000: %s" % key
                 key = key[3:]
 
             assert key not in sheet_dict[current_acc], "Double KBK %s in account %s" % (key, current_acc)
