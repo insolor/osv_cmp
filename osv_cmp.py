@@ -1,7 +1,8 @@
 import json
-from collections import OrderedDict
-
+import pprint
 import xlrd
+
+from collections import OrderedDict
 
 
 def load_osv_smeta(sheet: xlrd.sheet.Sheet):
@@ -16,7 +17,7 @@ def load_osv_smeta(sheet: xlrd.sheet.Sheet):
             break
         elif parts == 1 and len(key) > 0:
             pass
-        elif parts == 3:
+        elif 1 < parts <= 3:
             current_acc = key
             sheet_dict[current_acc] = OrderedDict()
         else:
@@ -41,28 +42,36 @@ def load_osv_1c(sheet: xlrd.sheet.Sheet):
         row = sheet.row_values(i)
         key = row[0]
         row = [0.0 if not item else item for item in (row[3], row[6], row[9], row[14], row[16], row[19])]
-        if isinstance(key, float):
-            key = key
-        else:
-            key = key
-
-        print(repr(key), row)
+        
         if key == 'Итого':
             break
         elif isinstance(key, float):
-            if current_kfo is None or key == current_kfo + 1:
+            next_key = str(sheet.row_values(i+1)[0]) if i < sheet.nrows - 1 else ''
+            if current_kfo is None or int(key) == current_kfo + 1 and not next_key.startswith('%02d' % key):
                 current_kfo = int(key)
+                key = str(int(key))
+            else:
+                key = '%02d' % key
+                current_acc = key
+        elif '.' in key:
+            current_acc = key
         else:
-            pass
+            acc = '%s.%s' % (current_kfo, current_acc)
+            if acc not in sheet_dict:
+                sheet_dict[acc] = OrderedDict()
+            sheet_dict[acc][key] = row
+    return sheet_dict
 
+pp = pprint.PrettyPrinter()
 
-wb = xlrd.open_workbook(r'c:\Users\ret\YandexDisk\ОСВ Тихвинский сс\OSV_VED_1.xls', formatting_info=True)
+wb = xlrd.open_workbook(r'ОСВ Тихвинский сс\OSV_VED_1.xls', formatting_info=True)
 sheet = wb.sheet_by_index(0)
 
-osv_smeta = json.dumps(load_osv_smeta(sheet), indent=2)
+osv_smeta = load_osv_smeta(sheet)
+pp.pprint([(key, len(val)) for key, val in osv_smeta.items()])
 
-wb = xlrd.open_workbook(r'c:\Users\ret\YandexDisk\ОСВ Тихвинский сс\Тихвинский ОСВ - после свертки.xls',
-                        formatting_info=True)
+wb = xlrd.open_workbook(r'ОСВ Тихвинский сс\Тихвинский ОСВ - после свертки.xls', formatting_info=True)
 sheet = wb.sheet_by_index(0)
 
-load_osv_1c(sheet)
+osv_1c = load_osv_1c(sheet)
+pp.pprint([(key, len(val)) for key, val in osv_1c.items()])
