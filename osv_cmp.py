@@ -20,6 +20,12 @@ def load_osv_smeta(sheet: xlrd.sheet.Sheet):
             sheet_dict[current_acc] = OrderedDict()
         else:
             assert current_acc is not None
+            key = ''.join(key.split('.'))
+
+            if len(key) == 20:
+                assert key.startswith('000')
+                key = key[3:]
+
             sheet_dict[current_acc][key] = row[1:]
 
     return sheet_dict
