@@ -1,5 +1,6 @@
 from collections import OrderedDict
 
+import json
 import xlrd
 
 
@@ -35,4 +36,4 @@ def load_osv_smeta(sheet: xlrd.sheet.Sheet):
 rb = xlrd.open_workbook(r'c:\Users\ret\YandexDisk\ОСВ Тихвинский сс\OSV_VED_1.xls', formatting_info=True)
 sheet = rb.sheet_by_index(0)
 
-print(dict(load_osv_smeta(sheet)))
+print(json.dumps(load_osv_smeta(sheet), indent=2))
