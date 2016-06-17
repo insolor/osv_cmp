@@ -26,6 +26,7 @@ def load_osv_smeta(sheet: xlrd.sheet.Sheet):
                 assert key.startswith('000')
                 key = key[3:]
 
+            assert key not in sheet_dict[current_acc], "Double KBK %s in account %s" % (key, current_acc)
             sheet_dict[current_acc][key] = row[1:]
 
     return sheet_dict
