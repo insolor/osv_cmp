@@ -59,6 +59,8 @@ def load_osv_1c(sheet: xlrd.sheet.Sheet):
             acc = '%s.%s' % (current_kfo, current_acc)
             if acc not in sheet_dict:
                 sheet_dict[acc] = OrderedDict()
+            
+            assert key not in sheet_dict[acc], "Double KBK %s in account %s" % (key, acc)
             sheet_dict[acc][key] = row
     return sheet_dict
 
