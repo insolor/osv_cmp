@@ -30,9 +30,13 @@ class App(tk.Tk):
         self.report.print("Формат: %s" % fmt)
 
         if fmt == '1c':
-            return load_osv_1c(sheet)
+            osv = load_osv_1c(sheet)
+            self.report.print("Файл загружен.")
+            return osv
         elif fmt == 'Smeta':
-            return load_osv_smeta(sheet)
+            osv = load_osv_smeta(sheet)
+            self.report.print("Файл загружен.")
+            return osv
         else:
             self.report.print("Формат документа не опознан. Загрузка прекращена.")
             return None
@@ -59,6 +63,13 @@ class App(tk.Tk):
         self.entry2.delete(0, tk.END)
         self.osv2 = None
 
+    def bt_reread(self, event):
+        self.report.clear()
+        self.filename1 = self.entry1.get()
+        self.osv1 = self.load_file(self.filename1)
+        self.filename2 = self.entry2.get()
+        self.osv2 = self.load_file(self.filename2)
+
     def __init__(self):
         super().__init__()
         
@@ -84,7 +95,9 @@ class App(tk.Tk):
         button.grid(column=3, row=2)
         button.bind('<1>', self.bt_clear_entry2)
         
-        ttk.Button(self, text='Загрузить/\nперечитать').grid(column=4, row=1, rowspan=2, sticky=tk.NS)
+        button = ttk.Button(self, text='Загрузить/\nперечитать')
+        button.grid(column=4, row=1, rowspan=2, sticky=tk.NS)
+        button.bind('<1>', self.bt_reread)
 
         ttk.Button(self, text='Сравнить').grid(column=5, row=1, rowspan=2, sticky=tk.NS)
 
