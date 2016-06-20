@@ -49,7 +49,6 @@ def load_osv_1c(sheet: xlrd.sheet.Sheet):
             next_key = str(sheet.row_values(i+1)[0]) if i < sheet.nrows - 1 else ''
             if current_kfo is None or int(key) == current_kfo + 1 and not next_key.startswith('%02d' % key):
                 current_kfo = int(key)
-                key = str(int(key))
             else:
                 key = '%02d' % key
                 current_acc = key
