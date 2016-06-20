@@ -77,6 +77,22 @@ def load_osv_smeta(sheet: xlrd.sheet.Sheet):
     return sheet_dict
 
 
+def load_osv_general(sheet: xlrd.sheet.Sheet):
+    if sheet.row_values(1)[0].startswith('Оборотно-сальдовая ведомость'):
+        return load_osv_1c(sheet)
+    else:
+        return load_osv_smeta(sheet)
+
+
+def check_format(sheet: xlrd.sheet.Sheet):
+    if sheet.row_values(1)[0].startswith('Оборотно-сальдовая ведомость'):
+        return '1c'
+    elif sheet.row_values(1)[0] == 'ОБОРОТНО-САЛЬДОВАЯ ВЕДОМОСТЬ':
+        return 'Smeta'
+    else:
+        return 'unknown'
+
+
 def main(file1, file2):
     pp = pprint.PrettyPrinter()
 
