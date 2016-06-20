@@ -60,20 +60,31 @@ def load_osv_1c(sheet: xlrd.sheet.Sheet):
             if acc not in sheet_dict:
                 sheet_dict[acc] = OrderedDict()
             
-            assert key not in sheet_dict[acc], "Double KBK %s in account %s" % (key, acc)
+            if key in sheet_dict[acc]:
+                print("Double KBK %s in account %s" % (key, acc))
+                j = 1
+                candidate = '%s_%d' % (key, j)
+                while candidate in sheet_dict[acc]:
+                    j += 1
+                    candidate = '%s_%d' % (key, j)
+                key = candidate
             sheet_dict[acc][key] = row
     return sheet_dict
 
-pp = pprint.PrettyPrinter()
 
-wb = xlrd.open_workbook(r'ОСВ Тихвинский сс\OSV_VED_1.xls', formatting_info=True)
-sheet = wb.sheet_by_index(0)
+def main():
+    pp = pprint.PrettyPrinter()
 
-osv_smeta = load_osv_smeta(sheet)
-pp.pprint([(key, len(val)) for key, val in osv_smeta.items()])
+    wb = xlrd.open_workbook(r'ОСВ Тихвинский сс\OSV_VED_1.xls', formatting_info=True)
+    sheet = wb.sheet_by_index(0)
 
-wb = xlrd.open_workbook(r'ОСВ Тихвинский сс\Тихвинский ОСВ - после свертки.xls', formatting_info=True)
-sheet = wb.sheet_by_index(0)
+    osv_smeta = load_osv_smeta(sheet)
+    pp.pprint([(key, len(val)) for key, val in osv_smeta.items()])
 
-osv_1c = load_osv_1c(sheet)
-pp.pprint([(key, len(val)) for key, val in osv_1c.items()])
+    wb = xlrd.open_workbook(r'ОСВ Тихвинский сс\Тихвинский ОСВ - после свертки.xls', formatting_info=True)
+    sheet = wb.sheet_by_index(0)
+
+    osv_1c = load_osv_1c(sheet)
+    pp.pprint([(key, len(val)) for key, val in osv_1c.items()])
+
+main()
