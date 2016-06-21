@@ -21,6 +21,9 @@ class Report(tk.Text):
 
 class App(tk.Tk):
     def load_file(self, filename):
+        if not filename:
+            return
+
         self.report.print("Загрузка файла %r" % filename)
 
         wb = xlrd.open_workbook(filename, formatting_info=True)
@@ -41,59 +44,52 @@ class App(tk.Tk):
             self.report.print("Формат документа не опознан. Загрузка прекращена.")
             return None
 
-    def bt_pick_file1(self, event):
-        self.filename1 = filedialog.askopenfilename(filetypes=[('Документ Excel', '*.xls')])
-        self.entry1.delete(0, tk.END)
-        self.entry1.insert(0, self.filename1)
+    def bt_pick_file(self, i, event):
+        self.filename[i] = filedialog.askopenfilename(filetypes=[('Документ Excel', '*.xls')])
+        if not self.filename[i]:
+            return
 
-        self.osv1 = self.load_file(self.filename1)
+        self.entry[i].delete(0, tk.END)
+        self.entry[i].insert(0, self.filename[i])
 
-    def bt_pick_file2(self, event):
-        self.filename2 = filedialog.askopenfilename(filetypes=[('Документ Excel', '*.xls')])
-        self.entry2.delete(0, tk.END)
-        self.entry2.insert(0, self.filename2)
+        self.osv[i] = self.load_file(self.filename[i])
 
-        self.osv2 = self.load_file(self.filename2)
-
-    def bt_clear_entry1(self, event):
-        self.entry1.delete(0, tk.END)
-        self.osv1 = None
-
-    def bt_clear_entry2(self, event):
-        self.entry2.delete(0, tk.END)
-        self.osv2 = None
+    def bt_clear_entry(self, i, event):
+        self.entry[i].delete(0, tk.END)
+        self.osv[i] = None
 
     def bt_reread(self, event):
         self.report.clear()
-        self.filename1 = self.entry1.get()
-        self.osv1 = self.load_file(self.filename1)
-        self.filename2 = self.entry2.get()
-        self.osv2 = self.load_file(self.filename2)
+        for i in range(2):
+            self.filename[i] = self.entry[i].get()
+            self.osv[i] = self.load_file(self.filename[i])
 
     def __init__(self):
         super().__init__()
         
         button = ttk.Button(self, text='Выбрать файл 1')
         button.grid(column=1, row=1)
-        button.bind('<1>', self.bt_pick_file1)
+        button.bind('<1>', lambda event: self.bt_pick_file(0, event))
 
-        self.entry1 = ttk.Entry(self, width=100)
-        self.entry1.grid(column=2, row=1, sticky=tk.EW)
+        self.entry = [None, None]
+
+        self.entry[0] = ttk.Entry(self, width=100)
+        self.entry[0].grid(column=2, row=1, sticky=tk.EW)
 
         button = ttk.Button(self, text='X')
         button.grid(column=3, row=1)
-        button.bind('<1>', self.bt_clear_entry1)
+        button.bind('<1>', lambda event: self.bt_clear_entry(0, event))
 
         button = ttk.Button(self, text='Выбрать файл 2')
         button.grid(column=1, row=2)
-        button.bind('<1>', self.bt_pick_file2)
-        
-        self.entry2 = ttk.Entry(self, width=100)
-        self.entry2.grid(column=2, row=2, sticky=tk.EW)
+        button.bind('<1>', lambda event: self.bt_pick_file(1, event))
+
+        self.entry[1] = ttk.Entry(self, width=100)
+        self.entry[1].grid(column=2, row=2, sticky=tk.EW)
 
         button = ttk.Button(self, text='X')
         button.grid(column=3, row=2)
-        button.bind('<1>', self.bt_clear_entry2)
+        button.bind('<1>', lambda event: self.bt_clear_entry(1, event))
         
         button = ttk.Button(self, text='Загрузить/\nперечитать')
         button.grid(column=4, row=1, rowspan=2, sticky=tk.NS)
@@ -106,8 +102,8 @@ class App(tk.Tk):
         
         ttk.Button(self, text='Сохранить отчет').grid(column=1, row=5)
 
-        self.osv1 = None
-        self.osv2 = None
+        self.osv = [None, None]
+        self.filename = [None, None]
 
 app = App()
 app.mainloop()
