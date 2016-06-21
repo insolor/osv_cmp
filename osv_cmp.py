@@ -85,9 +85,11 @@ def load_osv_general(sheet: xlrd.sheet.Sheet):
 
 
 def check_format(sheet: xlrd.sheet.Sheet):
-    if sheet.row_values(1)[0].startswith('Оборотно-сальдовая ведомость'):
+    cell00 = sheet.row_values(0)[0]
+    cell10 = sheet.row_values(1)[0]
+    if cell00.startswith('Оборотно-сальдовая ведомость') or cell10.startswith('Оборотно-сальдовая ведомость'):
         return '1c'
-    elif sheet.row_values(1)[0] == 'ОБОРОТНО-САЛЬДОВАЯ ВЕДОМОСТЬ':
+    elif cell10 == 'ОБОРОТНО-САЛЬДОВАЯ ВЕДОМОСТЬ':
         return 'Smeta'
     else:
         return 'unknown'
