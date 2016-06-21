@@ -66,12 +66,12 @@ class App(tk.Tk):
 
     def __init__(self):
         super().__init__()
-        
+
+        self.entry = [None, None]
+
         button = ttk.Button(self, text='Выбрать файл 1')
         button.grid(column=1, row=1)
         button.bind('<1>', lambda event: self.bt_pick_file(0, event))
-
-        self.entry = [None, None]
 
         self.entry[0] = ttk.Entry(self, width=100)
         self.entry[0].grid(column=2, row=1, sticky=tk.EW)
@@ -90,7 +90,7 @@ class App(tk.Tk):
         button = ttk.Button(self, text='X')
         button.grid(column=3, row=2)
         button.bind('<1>', lambda event: self.bt_clear_entry(1, event))
-        
+
         button = ttk.Button(self, text='Загрузить/\nперечитать')
         button.grid(column=4, row=1, rowspan=2, sticky=tk.NS)
         button.bind('<1>', self.bt_reread)
