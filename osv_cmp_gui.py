@@ -4,11 +4,9 @@ import tkinter.ttk as ttk
 import tkinter.messagebox as messagebox
 import xlrd
 import json
-import pprint
 
 from tkinter import filedialog
 from osv_cmp import load_osv_smeta, load_osv_1c, check_format, osv_compare
-from collections import OrderedDict
 
 
 class Report(tk.Text):
