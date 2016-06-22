@@ -15,8 +15,8 @@ class Report(tk.Text):
     def clear(self):
         self.delete(0.0, tk.END)
 
-    def print(self, text='', end='\n'):
-        self.insert(tk.END, text + end)
+    def print(self, *objects, sep=' ', end='\n'):
+        self.insert(tk.END, sep.join(str(item) for item in objects) + end)
 
 
 class App(tk.Tk):
