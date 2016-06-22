@@ -1,6 +1,3 @@
-import json
-import pprint
-import sys
 import xlrd
 
 from collections import OrderedDict

@@ -50,7 +50,7 @@ class App(tk.Tk):
         self.reports[i].print("Загружено подчиненных записей: %d" % sum(len(records) for records in osv.values()))
         return osv
 
-    def bt_pick_file(self, event, i):
+    def bt_pick_file(self, _, i):
         self.filename[i] = filedialog.askopenfilename(filetypes=[('Документ Excel', '*.xls')])
         if not self.filename[i]:
             return
@@ -61,13 +61,13 @@ class App(tk.Tk):
 
         self.osv[i] = self.load_file(self.filename[i], i)
 
-    def bt_clear_entry(self, event, i):
+    def bt_clear_entry(self, _, i):
         self.entry[i].delete(0, tk.END)
         self.filename[i] = ''
         self.osv[i] = None
         self.reports[i].clear()
 
-    def bt_reread(self, event):
+    def bt_reread(self, _):
         for i in range(2):
             self.filename[i] = self.entry[i].get()
             self.osv[i] = self.load_file(self.filename[i], i)
@@ -75,7 +75,7 @@ class App(tk.Tk):
         self.reports[2].clear()
         self.notebook.select(0)
     
-    def bt_compare(self, event):
+    def bt_compare(self, _):
         if not (self.osv[0] and self.osv[1]):
             messagebox.showwarning('Нужно два документа',
                                    'Для сравнения нужно загрузить два документа')
