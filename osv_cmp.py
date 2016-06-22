@@ -62,7 +62,7 @@ def load_osv_smeta(sheet: xlrd.sheet.Sheet):
         parts = key.count('.') + 1
         if key.startswith('Итого'):
             break
-        elif parts == 1 and len(key) > 0:
+        elif parts == 1 and 0 < len(key) < 17:
             pass
         elif 1 < parts <= 3 and len(key) < 17 or 'Н' in key:
             current_acc = key
