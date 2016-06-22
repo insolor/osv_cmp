@@ -96,9 +96,7 @@ def load_osv_smeta(sheet: xlrd.sheet.Sheet):
 
 
 def check_format(sheet: xlrd.sheet.Sheet):
-    cell00 = sheet.row_values(0)[0]
-    cell10 = sheet.row_values(1)[0]
-    if cell00.startswith('Оборотно-сальдовая ведомость') or cell10.startswith('Оборотно-сальдовая ведомость'):
+    if any(sheet.row_values(i)[0].startswith('Оборотно-сальдовая ведомость') for i in range(2)):
         return '1c'
     elif cell10 == 'ОБОРОТНО-САЛЬДОВАЯ ВЕДОМОСТЬ':
         return 'Smeta'
