@@ -52,7 +52,7 @@ class App(tk.Tk):
         self.report.print()
         return osv
 
-    def bt_pick_file(self, i, event):
+    def bt_pick_file(self, event, i):
         self.filename[i] = filedialog.askopenfilename(filetypes=[('Документ Excel', '*.xls')])
         if not self.filename[i]:
             return
@@ -62,7 +62,7 @@ class App(tk.Tk):
 
         self.osv[i] = self.load_file(self.filename[i])
 
-    def bt_clear_entry(self, i, event):
+    def bt_clear_entry(self, event, i):
         self.entry[i].delete(0, tk.END)
         self.filename[i] = ''
         self.osv[i] = None
@@ -122,34 +122,24 @@ class App(tk.Tk):
         def init_header(parent):
             self.entry = [None, None]
             
-            button = ttk.Button(parent, text='Выбрать файл 1')
-            button.grid(column=1, row=1)
-            button.bind('<1>', lambda event: self.bt_pick_file(0, event))
+            for i in range(2):
+                button = ttk.Button(parent, text='Выбрать файл %d' % (i+1))
+                button.grid(column=0, row=i)
+                button.bind('<1>', lambda event, i=i: self.bt_pick_file(event, i))
 
-            self.entry[0] = ttk.Entry(parent, width=100)
-            self.entry[0].grid(column=2, row=1, sticky=tk.EW)
+                self.entry[i] = ttk.Entry(parent, width=100)
+                self.entry[i].grid(column=1, row=i, sticky=tk.EW)
 
-            button = ttk.Button(parent, text='X')
-            button.grid(column=3, row=1)
-            button.bind('<1>', lambda event: self.bt_clear_entry(0, event))
-
-            button = ttk.Button(parent, text='Выбрать файл 2')
-            button.grid(column=1, row=2)
-            button.bind('<1>', lambda event: self.bt_pick_file(1, event))
-
-            self.entry[1] = ttk.Entry(parent, width=100)
-            self.entry[1].grid(column=2, row=2, sticky=tk.EW)
-
-            button = ttk.Button(parent, text='X')
-            button.grid(column=3, row=2)
-            button.bind('<1>', lambda event: self.bt_clear_entry(1, event))
-
+                button = ttk.Button(parent, text='X')
+                button.grid(column=2, row=i)
+                button.bind('<1>', lambda event, i=i: self.bt_clear_entry(event, i))
+            
             button = ttk.Button(parent, text='Загрузить/\nперечитать')
-            button.grid(column=4, row=1, rowspan=2, sticky=tk.NS)
+            button.grid(column=3, row=0, rowspan=2, sticky=tk.NS)
             button.bind('<1>', self.bt_reread)
 
             button = ttk.Button(parent, text='Сравнить')
-            button.grid(column=5, row=1, rowspan=2, sticky=tk.NS)
+            button.grid(column=4, row=0, rowspan=2, sticky=tk.NS)
             button.bind('<1>', self.bt_compare)
         
         def init_report_area(parent):
