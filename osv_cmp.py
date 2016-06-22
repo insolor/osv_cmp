@@ -7,14 +7,15 @@ from collections import OrderedDict
 
 
 def load_osv_1c(sheet: xlrd.sheet.Sheet):
+    log = []
     sheet_dict = OrderedDict()
     current_kfo = 0
     current_acc = None
-    for i in range(9, sheet.nrows):
+    for i in range(12, sheet.nrows):
         row = sheet.row_values(i)
         key = row[0]
         row = [0.0 if not item else item for item in (row[3], row[6], row[9], row[14], row[16], row[19])]
-
+        assert current_acc is None or 'None' not in current_acc, 'Line #%d' % i
         if key == 'Итого':
             break
         elif isinstance(key, float):
@@ -33,12 +34,13 @@ def load_osv_1c(sheet: xlrd.sheet.Sheet):
         elif '.' in key or 'Н' in key or key == 'ОЦИ':
             current_acc = key
         else:
+            assert current_acc is not None, "Line #%d" % i
             acc = '%s.%s' % (current_kfo, current_acc)
             if acc not in sheet_dict:
                 sheet_dict[acc] = OrderedDict()
 
             if key in sheet_dict[acc]:
-                print("Double KBK %r in account %s, line #%d" % (key, acc, i + 1))
+                log.append("Double KBK %r in account %s, line #%d" % (key, acc, i + 1))
                 j = 1
                 candidate = '%s_%d' % (key, j)
                 while candidate in sheet_dict[acc]:
@@ -46,10 +48,11 @@ def load_osv_1c(sheet: xlrd.sheet.Sheet):
                     candidate = '%s_%d' % (key, j)
                 key = candidate
             sheet_dict[acc][key] = row
-    return sheet_dict
+    return sheet_dict, log
 
 
 def load_osv_smeta(sheet: xlrd.sheet.Sheet):
+    log = []
     sheet_dict = OrderedDict()
     current_acc = None
     for i in range(8, sheet.nrows):
@@ -70,11 +73,21 @@ def load_osv_smeta(sheet: xlrd.sheet.Sheet):
 
             if len(key) == 20 and key.startswith('000'):
                 key = key[3:]
-
-            assert key not in sheet_dict[current_acc], "Double KBK %s in account %s, line #%d" % (key, current_acc, i+1)
+            
+            # if key in sheet_dict[current_acc]:
+                # log.append("Double KBK %r in account %s, line #%d" % (key, current_acc, i+1))
+            if key in sheet_dict[current_acc]:
+                log.append("Double KBK %r in account %s, line #%d" % (key, current_acc, i + 1))
+                j = 1
+                candidate = '%s_%d' % (key, j)
+                while candidate in sheet_dict[current_acc]:
+                    j += 1
+                    candidate = '%s_%d' % (key, j)
+                key = candidate
+            
             sheet_dict[current_acc][key] = row[1:]
 
-    return sheet_dict
+    return sheet_dict, log
 
 
 def load_osv_general(sheet: xlrd.sheet.Sheet):
@@ -129,8 +142,4 @@ def main(file1, file2):
 if __name__ == '__main__':
     if len(sys.argv) >= 3:
         file1, file2 = sys.argv[1], sys.argv[2]
-    else:
-        file1 = r'МАУК Нижнематренский\МАУК Нижнематренский ОСВ за 2016 г. - после.xls'
-        file2 = r'МАУК Нижнематренский\OSV_VED_1.xls'
-
-    main(file1, file2)
+        main(file1, file2)

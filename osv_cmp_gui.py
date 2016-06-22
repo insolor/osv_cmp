@@ -3,9 +3,12 @@ import tkinter as tk
 import tkinter.ttk as ttk
 import tkinter.messagebox as messagebox
 import xlrd
+import json
+import pprint
 
 from tkinter import filedialog
 from osv_cmp import load_osv_smeta, load_osv_1c, check_format
+from collections import OrderedDict
 
 
 class Report(tk.Text):
@@ -33,16 +36,20 @@ class App(tk.Tk):
         self.report.print("Формат: %s" % fmt)
 
         if fmt == '1c':
-            osv = load_osv_1c(sheet)
+            osv, log = load_osv_1c(sheet)
         elif fmt == 'Smeta':
-            osv = load_osv_smeta(sheet)
+            osv, log = load_osv_smeta(sheet)
         else:
             self.report.print("Формат документа не опознан. Загрузка прекращена.")
             return None
         
+        self.report.print(*log, sep='\n')
+        
         self.report.print("Файл загружен.")
         self.report.print("Загружено счетов: %d" % len(osv))
-        self.report.print("Загружено подчиненных записей: %d" % sum(len(value) for value in osv))
+        self.report.print("Загружено подчиненных записей: %d" % sum(len(records) for records in osv.values()))
+        
+        self.report.print()
         return osv
 
     def bt_pick_file(self, i, event):
@@ -57,6 +64,7 @@ class App(tk.Tk):
 
     def bt_clear_entry(self, i, event):
         self.entry[i].delete(0, tk.END)
+        self.filename[i] = ''
         self.osv[i] = None
 
     def bt_reread(self, event):
@@ -64,7 +72,36 @@ class App(tk.Tk):
         for i in range(2):
             self.filename[i] = self.entry[i].get()
             self.osv[i] = self.load_file(self.filename[i])
-
+    
+    def bt_compare(self, event):
+        accs = [set(item.keys()) for item in self.osv]
+        if accs[0] == accs[1]:
+            self.report.print('Различий в наборе загруженных счетов нет.')
+        else:
+            self.report.print('Различия в наборе счетов:')
+            # Что пропало (из того что было вычесть то что осталось)
+            for item in sorted(accs[0] - accs[1], key=lambda x: x.split('.')):
+                self.report.print('-', item)
+            
+            # Что появилось (из того что стало вычесть то что было)
+            for item in sorted(accs[1] - accs[0], key=lambda x: x.split('.')):
+                self.report.print('+', item)
+        
+        self.report.print('\nСравнение набора подчиненных записей для каждого счета из исходного документа:')
+        diffs = OrderedDict()
+        osv = self.osv
+        for acc in osv[0]:
+            if acc in osv[1]:
+                records = [set(osv[i][acc].keys()) for i in range(2)]
+                if records[0] == records[1]:
+                    continue
+                diffs[acc] = (sorted(records[0] - records[1]), sorted(records[1] - records[0]))
+        
+        if not diffs:
+            self.report.print('Различий нет.')
+        else:
+            self.report.print(pprint.pformat(diffs))
+    
     def __init__(self):
         super().__init__()
 
@@ -96,7 +133,9 @@ class App(tk.Tk):
         button.grid(column=4, row=1, rowspan=2, sticky=tk.NS)
         button.bind('<1>', self.bt_reread)
 
-        ttk.Button(self, text='Сравнить').grid(column=5, row=1, rowspan=2, sticky=tk.NS)
+        button = ttk.Button(self, text='Сравнить')
+        button.grid(column=5, row=1, rowspan=2, sticky=tk.NS)
+        button.bind('<1>', self.bt_compare)
 
         self.report = Report()
         self.report.grid(column=1, row=4, columnspan=5, sticky=tk.EW)
