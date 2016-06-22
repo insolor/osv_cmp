@@ -11,7 +11,14 @@ def load_osv_1c(sheet: xlrd.sheet.Sheet):
     sheet_dict = OrderedDict()
     current_kfo = 0
     current_acc = None
-    for i in range(12, sheet.nrows):
+    
+    start = None
+    for i in range(0, sheet.nrows):
+        if sheet.row_values(i)[0] == 'КПС':
+            start = i+1
+            break
+    
+    for i in range(start, sheet.nrows):
         row = sheet.row_values(i)
         key = row[0]
         row = [0.0 if not item else item for item in (row[3], row[6], row[9], row[14], row[16], row[19])]
@@ -32,8 +39,9 @@ def load_osv_1c(sheet: xlrd.sheet.Sheet):
                     del(sheet_dict[acc])
         elif '.' in key or 'Н' in key or key == 'ОЦИ':
             current_acc = key
+        elif current_acc is None:
+            current_kfo = 0
         else:
-            assert current_acc is not None, "Line #%d" % i
             acc = '%s.%s' % (current_kfo, current_acc)
             if acc not in sheet_dict:
                 sheet_dict[acc] = OrderedDict()
