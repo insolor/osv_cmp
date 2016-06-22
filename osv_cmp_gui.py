@@ -100,7 +100,14 @@ class App(tk.Tk):
         if not diffs:
             self.report.print('Различий нет.')
         else:
-            self.report.print(pprint.pformat(diffs))
+            for acc, (absent, new) in diffs.items():
+                self.report.print('%s:' % acc)
+                
+                for item in absent:
+                    self.report.print(' - %r' % item)
+                
+                for item in new:
+                    self.report.print(' + %r' % item)
     
     def __init__(self):
         super().__init__()
