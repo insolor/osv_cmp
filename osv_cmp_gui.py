@@ -87,6 +87,7 @@ class App(tk.Tk):
             return
 
         self.notebook.select(2)
+        self.report.clear()
 
         diffs = osv_compare(*self.osv)
         
@@ -168,6 +169,16 @@ class App(tk.Tk):
             button = ttk.Button(parent, text='Сохранить отчет')
             button.pack()
 
+        def init_notebook(*tabs):
+            notebook = ttk.Notebook()
+            self.reports = [None, None, None]
+            for i in range(3):
+                f1 = tk.Frame(notebook)
+                notebook.add(f1, text=tabs[i])
+                notebook.pack(fill='both', expand=1)
+                self.reports[i] = init_report_area(f1)
+            return notebook
+
         super().__init__()
         
         header = tk.Frame()
@@ -178,14 +189,7 @@ class App(tk.Tk):
         footer.pack(side='bottom', fill='x')
         init_footer(footer)
 
-        tabs = ['Отчет по файлу 1', 'Отчет по файлу 2', 'Сравнение']
-        self.notebook = ttk.Notebook()
-        self.reports = [None, None, None]
-        for i in range(3):
-            f1 = tk.Frame(self.notebook)
-            self.notebook.add(f1, text=tabs[i])
-            self.notebook.pack(fill='both', expand=1)
-            self.reports[i] = init_report_area(f1)
+        self.notebook = init_notebook('Отчет по файлу 1', 'Отчет по файлу 2', 'Сравнение')
 
         self.report = self.reports[2]
         
