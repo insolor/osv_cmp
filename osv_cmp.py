@@ -113,12 +113,11 @@ def osv_compare(*osv):
     if accs[0] == accs[1]:
         diff_accs = None
     else:
-        diff_accs = (
-            # Что пропало (из того что было вычесть то что осталось)
-            sorted(accs[0] - accs[1], key=lambda x: x.split('.')),
-            # Что появилось (из того что стало вычесть то что было)
-            sorted(accs[1] - accs[0], key=lambda x: x.split('.'))
-        )
+        diff_accs = [sorted(x, key=lambda x: x.split('.')) for x in (
+                accs[0] - accs[1],  # Что пропало (из того что было вычесть то что осталось)
+                accs[1] - accs[0],  # Что появилось (из того что стало вычесть то что было)
+            )
+        ]
     
     # Compare subrecords
     diffs = OrderedDict()
