@@ -23,17 +23,19 @@ class Report(tk.Text):
 
 
 class App(tk.Tk):
-    def load_file(self, filename):
+    def load_file(self, filename, i):
+        self.reports[i].clear()
+
         if not filename:
             return
 
-        self.report.print("Загрузка файла %r" % filename)
+        self.reports[i].print("Загрузка файла %r" % filename)
 
         wb = xlrd.open_workbook(filename, formatting_info=True)
         sheet = wb.sheet_by_index(0)
 
         fmt = check_format(sheet)
-        self.report.print("Формат: %s" % fmt)
+        self.reports[i].print("Формат: %s" % fmt)
 
         if fmt == '1c':
             osv, log = load_osv_1c(sheet)
@@ -43,13 +45,11 @@ class App(tk.Tk):
             self.report.print("Формат документа не опознан. Загрузка прекращена.")
             return None
         
-        self.report.print(*log, sep='\n')
+        self.reports[i].print(*log, sep='\n')
         
-        self.report.print("Файл загружен.")
-        self.report.print("Загружено счетов: %d" % len(osv))
-        self.report.print("Загружено подчиненных записей: %d" % sum(len(records) for records in osv.values()))
-        
-        self.report.print()
+        self.reports[i].print("Файл загружен.")
+        self.reports[i].print("Загружено счетов: %d" % len(osv))
+        self.reports[i].print("Загружено подчиненных записей: %d" % sum(len(records) for records in osv.values()))
         return osv
 
     def bt_pick_file(self, event, i):
@@ -57,26 +57,39 @@ class App(tk.Tk):
         if not self.filename[i]:
             return
 
+        self.notebook.select(i)
         self.entry[i].delete(0, tk.END)
         self.entry[i].insert(0, self.filename[i])
 
-        self.osv[i] = self.load_file(self.filename[i])
+        self.osv[i] = self.load_file(self.filename[i], i)
 
     def bt_clear_entry(self, event, i):
         self.entry[i].delete(0, tk.END)
         self.filename[i] = ''
         self.osv[i] = None
+        self.reports[i].clear()
 
     def bt_reread(self, event):
-        self.report.clear()
         for i in range(2):
             self.filename[i] = self.entry[i].get()
-            self.osv[i] = self.load_file(self.filename[i])
+            self.osv[i] = self.load_file(self.filename[i], i)
+
+        self.reports[2].clear()
+        self.notebook.select(0)
     
     def bt_compare(self, event):
         if not (self.osv[0] and self.osv[1]):
+            messagebox.showwarning('Нужно два документа',
+                                   'Для сравнения нужно загрузить два документа')
             return
-        
+
+        if self.filename[0] == self.filename[1]:
+            messagebox.showwarning('Один и тот же документ',
+                                   'Вы пытаетесь сравнить один и тот же документ с самим собой')
+            return
+
+        self.notebook.select(2)
+
         diffs = osv_compare(*self.osv)
         
         if not diffs['accs']:
@@ -92,7 +105,7 @@ class App(tk.Tk):
         
         self.report.print('\nСравнение набора подчиненных записей для каждого счета из исходного документа:')
         diff_records = diffs['records']
-        if not diff_records :
+        if not diff_records:
             self.report.print('Различий нет.')
         else:
             for acc, (absent, new) in diff_records.items():
@@ -146,16 +159,17 @@ class App(tk.Tk):
             scrollbar = ttk.Scrollbar(parent)
             scrollbar.pack(side='right', fill='y')
             
-            self.report = Report(parent)
-            self.report.pack(side='left', fill='both', expand=1)
+            report = Report(parent)
+            report.pack(fill='both', expand=1)
             
-            scrollbar['command'] = self.report.yview
-            self.report['yscrollcommand'] = scrollbar.set
+            scrollbar['command'] = report.yview
+            report['yscrollcommand'] = scrollbar.set
+            return report
         
         def init_footer(parent):
             button = ttk.Button(parent, text='Сохранить отчет')
             button.pack()
-        
+
         super().__init__()
         
         header = tk.Frame()
@@ -165,11 +179,17 @@ class App(tk.Tk):
         footer = tk.Frame()
         footer.pack(side='bottom', fill='x')
         init_footer(footer)
-        
-        report_area = tk.Frame()
-        report_area.pack()
-        init_report_area(self)
-        
+
+        tabs = ['Отчет по файлу 1', 'Отчет по файлу 2', 'Сравнение']
+        self.notebook = ttk.Notebook()
+        self.reports = [None, None, None]
+        for i in range(3):
+            f1 = tk.Frame(self.notebook)
+            self.notebook.add(f1, text=tabs[i])
+            self.notebook.pack(fill='both', expand=1)
+            self.reports[i] = init_report_area(f1)
+
+        self.report = self.reports[2]
         
         self.osv = [None, None]
         self.filename = [None, None]
