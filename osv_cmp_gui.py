@@ -85,10 +85,10 @@ class App(tk.Tk):
             self.report.print('Различия в наборе счетов:')
             
             for item in diffs['accs'][0]:
-                self.report.print('-', item)
+                self.report.print('- %r' % item)
             
-            for item in diffs['accs'][0]:
-                self.report.print('+', item)
+            for item in diffs['accs'][1]:
+                self.report.print('+ %r' % item)
         
         self.report.print('\nСравнение набора подчиненных записей для каждого счета из исходного документа:')
         diff_records = diffs['records']
