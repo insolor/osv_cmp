@@ -34,15 +34,16 @@ class App(tk.Tk):
 
         if fmt == '1c':
             osv = load_osv_1c(sheet)
-            self.report.print("Файл загружен.")
-            return osv
         elif fmt == 'Smeta':
             osv = load_osv_smeta(sheet)
-            self.report.print("Файл загружен.")
-            return osv
         else:
             self.report.print("Формат документа не опознан. Загрузка прекращена.")
             return None
+        
+        self.report.print("Файл загружен.")
+        self.report.print("Загружено счетов: %d" % len(osv))
+        self.report.print("Загружено подчиненных записей: %d" % sum(len(value) for value in osv))
+        return osv
 
     def bt_pick_file(self, i, event):
         self.filename[i] = filedialog.askopenfilename(filetypes=[('Документ Excel', '*.xls')])
