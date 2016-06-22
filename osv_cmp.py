@@ -20,7 +20,6 @@ def load_osv_1c(sheet: xlrd.sheet.Sheet):
             break
         elif isinstance(key, float):
             next_key = str(sheet.row_values(i + 1)[0]) if i < sheet.nrows - 1 else ''
-            # if current_kfo is None or int(key) == current_kfo + 1 and not next_key.startswith('%02d' % key):
             if current_kfo < int(key) <= 5 and not next_key.startswith('%02d' % key):
                 current_kfo = int(key)
             else:
@@ -74,8 +73,6 @@ def load_osv_smeta(sheet: xlrd.sheet.Sheet):
             if len(key) == 20 and key.startswith('000'):
                 key = key[3:]
             
-            # if key in sheet_dict[current_acc]:
-                # log.append("Double KBK %r in account %s, line #%d" % (key, current_acc, i+1))
             if key in sheet_dict[current_acc]:
                 log.append("Double KBK %r in account %s, line #%d" % (key, current_acc, i + 1))
                 j = 1
@@ -90,13 +87,6 @@ def load_osv_smeta(sheet: xlrd.sheet.Sheet):
     return sheet_dict, log
 
 
-def load_osv_general(sheet: xlrd.sheet.Sheet):
-    if sheet.row_values(1)[0].startswith('Оборотно-сальдовая ведомость'):
-        return load_osv_1c(sheet)
-    else:
-        return load_osv_smeta(sheet)
-
-
 def check_format(sheet: xlrd.sheet.Sheet):
     cell00 = sheet.row_values(0)[0]
     cell10 = sheet.row_values(1)[0]
@@ -108,38 +98,5 @@ def check_format(sheet: xlrd.sheet.Sheet):
         return 'unknown'
 
 
-def main(file1, file2):
-    pp = pprint.PrettyPrinter()
-
-    wb = xlrd.open_workbook(file1, formatting_info=True)
-    sheet = wb.sheet_by_index(0)
-    print('Loading File1')
-    osv_smeta = load_osv_1c(sheet)
-    print('File1 loaded')
-
-    #pp.pprint([(key, len(val)) for key, val in osv_smeta.items()])
-
-    wb = xlrd.open_workbook(file2, formatting_info=True)
-    sheet = wb.sheet_by_index(0)
-
-    osv_1c = load_osv_smeta(sheet)
-    print('File2 loaded')
-
-    #pp.pprint([(key, len(val)) for key, val in osv_1c.items()])
-
-    # Сравнение набора счетов
-    accs1 = set(osv_smeta.keys())
-    accs2 = set(osv_1c.keys())
-
-    for item in sorted(accs1 - accs2, key=lambda x: x.split('.')):
-        print('-', item)
-
-    for item in sorted(accs2 - accs1, key=lambda x: x.split('.')):
-        print('+', item)
-
-    print()
-
 if __name__ == '__main__':
-    if len(sys.argv) >= 3:
-        file1, file2 = sys.argv[1], sys.argv[2]
-        main(file1, file2)
+    pass
