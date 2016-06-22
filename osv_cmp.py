@@ -98,5 +98,54 @@ def check_format(sheet: xlrd.sheet.Sheet):
         return 'unknown'
 
 
+def osv_compare(*osv):
+    assert len(osv) == 2
+    
+    # Compare accounts
+    accs = [set(item.keys()) for item in osv]
+    
+    if accs[0] == accs[1]:
+        diff_accs = None
+    else:
+        diff_accs = (
+            # Что пропало (из того что было вычесть то что осталось)
+            sorted(accs[0] - accs[1], key=lambda x: x.split('.')),
+            # Что появилось (из того что стало вычесть то что было)
+            sorted(accs[1] - accs[0], key=lambda x: x.split('.'))
+        )
+    
+    # Compare subrecords
+    diffs = OrderedDict()
+    osv = osv
+    for acc in osv[0]:
+        if acc in osv[1]:
+            records = [set(osv[i][acc].keys()) for i in range(2)]
+            if records[0] == records[1]:
+                continue
+            diffs[acc] = (sorted(records[0] - records[1]), sorted(records[1] - records[0]))
+    diff_records = diffs
+    
+    # Compare sums
+    diffs = OrderedDict()
+    for acc in osv[0]:
+        if acc in osv[1]:
+            for record, row in osv[0][acc].items():
+                if record in osv[1][acc]:
+                    row2 = osv[1][acc][record]
+                    if row[:4] == row2[:4]:
+                        continue
+                    elif (row[0]-row[1], row[2]-row[3]) == (row2[0]-row2[1], row2[2]-row2[3]):
+                        continue
+                    else:
+                        if acc not in diffs:
+                            diffs[acc] = OrderedDict()
+                        
+                        diffs[acc][record] = (row[:4], row2[:4])
+    
+    diff_sums = diffs
+    
+    return dict(accs=diff_accs, records=diff_records, sums=diff_sums)
+
+
 if __name__ == '__main__':
     pass

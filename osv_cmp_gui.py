@@ -7,7 +7,7 @@ import json
 import pprint
 
 from tkinter import filedialog
-from osv_cmp import load_osv_smeta, load_osv_1c, check_format
+from osv_cmp import load_osv_smeta, load_osv_1c, check_format, osv_compare
 from collections import OrderedDict
 
 
@@ -77,33 +77,25 @@ class App(tk.Tk):
         if not (self.osv[0] and self.osv[1]):
             return
         
-        accs = [set(item.keys()) for item in self.osv]
-        if accs[0] == accs[1]:
+        diffs = osv_compare(*self.osv)
+        
+        if not diffs['accs']:
             self.report.print('Различий в наборе загруженных счетов нет.')
         else:
             self.report.print('Различия в наборе счетов:')
-            # Что пропало (из того что было вычесть то что осталось)
-            for item in sorted(accs[0] - accs[1], key=lambda x: x.split('.')):
+            
+            for item in diffs['accs'][0]:
                 self.report.print('-', item)
             
-            # Что появилось (из того что стало вычесть то что было)
-            for item in sorted(accs[1] - accs[0], key=lambda x: x.split('.')):
+            for item in diffs['accs'][0]:
                 self.report.print('+', item)
         
         self.report.print('\nСравнение набора подчиненных записей для каждого счета из исходного документа:')
-        diffs = OrderedDict()
-        osv = self.osv
-        for acc in osv[0]:
-            if acc in osv[1]:
-                records = [set(osv[i][acc].keys()) for i in range(2)]
-                if records[0] == records[1]:
-                    continue
-                diffs[acc] = (sorted(records[0] - records[1]), sorted(records[1] - records[0]))
-        
-        if not diffs:
+        diff_records = diffs['records']
+        if not diff_records :
             self.report.print('Различий нет.')
         else:
-            for acc, (absent, new) in diffs.items():
+            for acc, (absent, new) in diff_records.items():
                 self.report.print('%s:' % acc)
                 
                 for item in absent:
@@ -113,26 +105,11 @@ class App(tk.Tk):
                     self.report.print(' + %r' % item)
         
         self.report.print('\nСравнение сумм:')
-        diffs = OrderedDict()
-        for acc in osv[0]:
-            if acc in osv[1]:
-                for record, row in osv[0][acc].items():
-                    if record in osv[1][acc]:
-                        row2 = osv[1][acc][record]
-                        if row[:4] == row2[:4]:
-                            continue
-                        elif (row[0]-row[1], row[2]-row[3]) == (row2[0]-row2[1], row2[2]-row2[3]):
-                            continue
-                        else:
-                            if acc not in diffs:
-                                diffs[acc] = OrderedDict()
-                            
-                            diffs[acc][record] = (row[:4], row2[:4])
-        
-        if not diffs:
+        diff_sums = diffs['sums']
+        if not diff_sums:
             self.report.print('Недопустимых различий нет.')
         else:
-            for acc, records in diffs.items():
+            for acc, records in diff_sums.items():
                 self.report.print('%s:' % acc)
                 
                 for record, diff in records.items():
