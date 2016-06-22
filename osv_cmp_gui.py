@@ -74,6 +74,9 @@ class App(tk.Tk):
             self.osv[i] = self.load_file(self.filename[i])
     
     def bt_compare(self, event):
+        if not (self.osv[0] and self.osv[1]):
+            return
+        
         accs = [set(item.keys()) for item in self.osv]
         if accs[0] == accs[1]:
             self.report.print('Различий в наборе загруженных счетов нет.')
@@ -108,6 +111,35 @@ class App(tk.Tk):
                 
                 for item in new:
                     self.report.print(' + %r' % item)
+        
+        self.report.print('\nСравнение сумм:')
+        diffs = OrderedDict()
+        for acc in osv[0]:
+            if acc in osv[1]:
+                for record, row in osv[0][acc].items():
+                    if record in osv[1][acc]:
+                        row2 = osv[1][acc][record]
+                        if row[:4] == row2[:4]:
+                            continue
+                        elif (row[0]-row[1], row[2]-row[3]) == (row2[0]-row2[1], row2[2]-row2[3]):
+                            continue
+                        else:
+                            if acc not in diffs:
+                                diffs[acc] = OrderedDict()
+                            
+                            diffs[acc][record] = (row[:4], row2[:4])
+        
+        if not diffs:
+            self.report.print('Недопустимых различий нет.')
+        else:
+            for acc, records in diffs.items():
+                self.report.print('%s:' % acc)
+                
+                for record, diff in records.items():
+                    self.report.print(' %r' % record)
+                    self.report.print('  --- | %15.2f | %15.2f | %15.2f | %15.2f | ...' % tuple(diff[0]))
+                    self.report.print('  +++ | %15.2f | %15.2f | %15.2f | %15.2f | ...' % tuple(diff[1]))
+                    self.report.print()
     
     def __init__(self):
         super().__init__()
