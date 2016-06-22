@@ -119,45 +119,68 @@ class App(tk.Tk):
                     self.report.print()
     
     def __init__(self):
-        super().__init__()
+        def init_header(parent):
+            self.entry = [None, None]
+            
+            button = ttk.Button(parent, text='Выбрать файл 1')
+            button.grid(column=1, row=1)
+            button.bind('<1>', lambda event: self.bt_pick_file(0, event))
 
-        self.entry = [None, None]
+            self.entry[0] = ttk.Entry(parent, width=100)
+            self.entry[0].grid(column=2, row=1, sticky=tk.EW)
 
-        button = ttk.Button(self, text='Выбрать файл 1')
-        button.grid(column=1, row=1)
-        button.bind('<1>', lambda event: self.bt_pick_file(0, event))
+            button = ttk.Button(parent, text='X')
+            button.grid(column=3, row=1)
+            button.bind('<1>', lambda event: self.bt_clear_entry(0, event))
 
-        self.entry[0] = ttk.Entry(self, width=100)
-        self.entry[0].grid(column=2, row=1, sticky=tk.EW)
+            button = ttk.Button(parent, text='Выбрать файл 2')
+            button.grid(column=1, row=2)
+            button.bind('<1>', lambda event: self.bt_pick_file(1, event))
 
-        button = ttk.Button(self, text='X')
-        button.grid(column=3, row=1)
-        button.bind('<1>', lambda event: self.bt_clear_entry(0, event))
+            self.entry[1] = ttk.Entry(parent, width=100)
+            self.entry[1].grid(column=2, row=2, sticky=tk.EW)
 
-        button = ttk.Button(self, text='Выбрать файл 2')
-        button.grid(column=1, row=2)
-        button.bind('<1>', lambda event: self.bt_pick_file(1, event))
+            button = ttk.Button(parent, text='X')
+            button.grid(column=3, row=2)
+            button.bind('<1>', lambda event: self.bt_clear_entry(1, event))
 
-        self.entry[1] = ttk.Entry(self, width=100)
-        self.entry[1].grid(column=2, row=2, sticky=tk.EW)
+            button = ttk.Button(parent, text='Загрузить/\nперечитать')
+            button.grid(column=4, row=1, rowspan=2, sticky=tk.NS)
+            button.bind('<1>', self.bt_reread)
 
-        button = ttk.Button(self, text='X')
-        button.grid(column=3, row=2)
-        button.bind('<1>', lambda event: self.bt_clear_entry(1, event))
-
-        button = ttk.Button(self, text='Загрузить/\nперечитать')
-        button.grid(column=4, row=1, rowspan=2, sticky=tk.NS)
-        button.bind('<1>', self.bt_reread)
-
-        button = ttk.Button(self, text='Сравнить')
-        button.grid(column=5, row=1, rowspan=2, sticky=tk.NS)
-        button.bind('<1>', self.bt_compare)
-
-        self.report = Report()
-        self.report.grid(column=1, row=4, columnspan=5, sticky=tk.EW)
+            button = ttk.Button(parent, text='Сравнить')
+            button.grid(column=5, row=1, rowspan=2, sticky=tk.NS)
+            button.bind('<1>', self.bt_compare)
         
-        ttk.Button(self, text='Сохранить отчет').grid(column=1, row=5)
-
+        def init_report_area(parent):
+            scrollbar = ttk.Scrollbar(parent)
+            scrollbar.pack(side='right', fill='y')
+            
+            self.report = Report(parent)
+            self.report.pack(side='left', fill='both', expand=1)
+            
+            scrollbar['command'] = self.report.yview
+            self.report['yscrollcommand'] = scrollbar.set
+        
+        def init_footer(parent):
+            button = ttk.Button(parent, text='Сохранить отчет')
+            button.pack()
+        
+        super().__init__()
+        
+        header = tk.Frame()
+        header.pack(side='top', fill='x')
+        init_header(header)
+        
+        footer = tk.Frame()
+        footer.pack(side='bottom', fill='x')
+        init_footer(footer)
+        
+        report_area = tk.Frame()
+        report_area.pack()
+        init_report_area(self)
+        
+        
         self.osv = [None, None]
         self.filename = [None, None]
 
