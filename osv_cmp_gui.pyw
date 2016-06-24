@@ -138,7 +138,7 @@ class App(tk.Tk):
 
         filename = filedialog.asksaveasfilename(filetypes=[('Текстовый документ', '*.txt')], defaultextension='.txt')
         if filename:
-            with open(filename, encoding='utf-8', mode='wt') as fn:
+            with open(filename, mode='wt') as fn:
                 print(('-' * 80 + '\n').join(part.get(1.0, tk.END) for part in self.reports), file=fn)
     
     def __init__(self):
