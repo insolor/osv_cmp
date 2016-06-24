@@ -129,6 +129,17 @@ class App(tk.Tk):
                     self.report.print('  --- | %15.2f | %15.2f | %15.2f | %15.2f | ...' % tuple(diff[0]))
                     self.report.print('  +++ | %15.2f | %15.2f | %15.2f | %15.2f | ...' % tuple(diff[1]))
                     self.report.print()
+
+    def bt_save_report(self, _):
+        if not any(part.get(1.0, tk.END).strip() for part in self.reports):
+            messagebox.showwarning('Пустой отчет', 'Отчет пуст: не загружен ни один файл и не произведено сравнение')
+            return
+
+        filename = filedialog.asksaveasfile(filetypes=[('Текстовый документ', '*.txt')])
+        if filename:
+            with open(filename, encoding='utf-8', mode='wt') as fn:
+                for part in self.reports:
+                    print(('-' * 80 + '\n').join(part.get(1.0, tk.END) for par in self.reports), file=fn)
     
     def __init__(self):
         def init_header(parent):
@@ -168,6 +179,7 @@ class App(tk.Tk):
         def init_footer(parent):
             button = ttk.Button(parent, text='Сохранить отчет')
             button.pack()
+            button.bind('<1>', self.bt_save_report)
 
         def init_notebook(*tabs):
             notebook = ttk.Notebook()
