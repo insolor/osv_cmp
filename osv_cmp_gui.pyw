@@ -135,7 +135,7 @@ class App(tk.Tk):
             messagebox.showwarning('Пустой отчет', 'Отчет пуст: не загружен ни один файл и не произведено сравнение')
             return
 
-        filename = filedialog.asksaveasfile(filetypes=[('Текстовый документ', '*.txt')])
+        filename = filedialog.asksaveasfilename(filetypes=[('Текстовый документ', '*.txt')], defaultextension='.txt')
         if filename:
             with open(filename, encoding='utf-8', mode='wt') as fn:
                 for part in self.reports:
