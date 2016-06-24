@@ -131,7 +131,6 @@ class App(tk.Tk):
                     self.report.print()
 
     def bt_save_report(self, _):
-        print(list(part.get(1.0, tk.END).strip() for part in self.reports))
         if not any(part.get(1.0, tk.END).strip() for part in self.reports):
             messagebox.showwarning('Пустой отчет', 'Отчет пуст: не загружен ни один файл и не произведено сравнение')
             return
