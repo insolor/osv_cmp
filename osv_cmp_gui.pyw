@@ -131,6 +131,7 @@ class App(tk.Tk):
                     self.report.print()
 
     def bt_save_report(self, _):
+        print(list(part.get(1.0, tk.END).strip() for part in self.reports))
         if not any(part.get(1.0, tk.END).strip() for part in self.reports):
             messagebox.showwarning('Пустой отчет', 'Отчет пуст: не загружен ни один файл и не произведено сравнение')
             return
@@ -138,8 +139,7 @@ class App(tk.Tk):
         filename = filedialog.asksaveasfilename(filetypes=[('Текстовый документ', '*.txt')], defaultextension='.txt')
         if filename:
             with open(filename, encoding='utf-8', mode='wt') as fn:
-                for part in self.reports:
-                    print(('-' * 80 + '\n').join(part.get(1.0, tk.END) for par in self.reports), file=fn)
+                print(('-' * 80 + '\n').join(part.get(1.0, tk.END) for part in self.reports), file=fn)
     
     def __init__(self):
         def init_header(parent):
