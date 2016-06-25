@@ -101,6 +101,16 @@ def check_format(sheet: xlrd.sheet.Sheet):
         return 'unknown'
 
 
+def symm_diff_dicts(d1, d2):
+    sd1 = set(d1.keys())
+    sd2 = set(d2.keys())
+    absent_keys = sd1 - sd2
+    absent_records = {key: value for key, value in d1.items() if key in absent_keys}
+    new_keys = sd2 - sd1
+    new_records = {key: value for key, value in d2.items() if key in new_keys}
+    return absent_records, new_records
+
+
 def osv_compare(*osv):
     assert len(osv) == 2
     
@@ -118,13 +128,12 @@ def osv_compare(*osv):
     
     # Compare subrecords
     diffs = OrderedDict()
-    osv = osv
     for acc in osv[0]:
         if acc in osv[1]:
-            records = [set(osv[i][acc].keys()) for i in range(2)]
-            if records[0] == records[1]:
+            records = [osv[i][acc] for i in range(2)]
+            if list(records[0].keys()) == list(records[1].keys()):
                 continue
-            diffs[acc] = (sorted(records[0] - records[1]), sorted(records[1] - records[0]))
+            diffs[acc] = symm_diff_dicts(records[0], records[1])
     diff_records = diffs
     
     # Compare sums
@@ -143,7 +152,7 @@ def osv_compare(*osv):
                             diffs[acc] = OrderedDict()
                         
                         diffs[acc][record] = (row[:4], row2[:4])
-    
+
     diff_sums = diffs
     
     return dict(accs=diff_accs, records=diff_records, sums=diff_sums)

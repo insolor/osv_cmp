@@ -110,11 +110,11 @@ class App(tk.Tk):
             for acc, (absent, new) in diff_records.items():
                 self.report.print('%s:' % acc)
                 
-                for item in absent:
-                    self.report.print(' - %r' % item)
+                for item, values in absent.items():
+                    self.report.print(' - %-22r [%s, ...]' % (item, ', '.join('%.2f' % n for n in values[:4])))
                 
-                for item in new:
-                    self.report.print(' + %r' % item)
+                for item, values in new.items():
+                    self.report.print(' + %-22r [%s, ...]' % (item, ', '.join('%.2f' % n for n in values[:4])))
         
         self.report.print('\nСравнение сумм:')
         diff_sums = diffs['sums']
