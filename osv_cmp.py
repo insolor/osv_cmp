@@ -43,8 +43,12 @@ def load_osv_1c(sheet: xlrd.sheet.Sheet):
             if acc not in sheet_dict:
                 sheet_dict[acc] = OrderedDict()
 
+            if key and '.' not in key:
+                log.append("КБК %r без точек в счете %s, строка #%d. "
+                           "Необходимо заполнить поля данного КБК в Смете-СМАРТ." % (key, acc, i + 1))
+
             if key in sheet_dict[acc]:
-                log.append("Double KBK %r in account %s, line #%d" % (key, acc, i + 1))
+                log.append("Дублирующуяся запись %r в счете %s, строка #%d" % (key, acc, i + 1))
                 j = 1
                 candidate = '%s_%d' % (key, j)
                 while candidate in sheet_dict[acc]:
