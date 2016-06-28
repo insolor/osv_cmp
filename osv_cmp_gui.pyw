@@ -6,7 +6,7 @@ import xlrd
 import json
 
 from tkinter import filedialog
-from osv_cmp import load_osv_smeta, load_osv_1c, check_format, osv_compare
+from osv_cmp import load_osv_smeta, load_osv_1c, check_format, osv_compare, osv_sum
 
 
 class Report(tk.Text):
@@ -48,6 +48,12 @@ class App(tk.Tk):
         self.reports[i].print("Файл загружен.")
         self.reports[i].print("Загружено счетов: %d" % len(osv))
         self.reports[i].print("Загружено подчиненных записей: %d" % sum(len(records) for records in osv.values()))
+
+        # todo: не учитывать забалансовые счета
+        s = osv_sum(osv)
+        self.reports[i].print("Сумма по документу (включая забалансовые счета):")
+        self.reports[i].print("[%s]" % ', '.join('%.2f' % item for item in s))
+
         return osv
 
     def bt_pick_file(self, _, i):

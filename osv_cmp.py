@@ -158,5 +158,19 @@ def osv_compare(*osv):
     return dict(accs=diff_accs, records=diff_records, sums=diff_sums)
 
 
+def sum_lists(s):
+    s = iter(s)
+    x = next(s)
+    for row in s:
+        assert len(x) == len(row), "Row lengths must be the same"
+        for i, item in enumerate(row):
+            x[i] += item
+    return x
+
+
+def osv_sum(osv: dict):
+    return sum_lists(operations for subrecord in osv.values() for operations in subrecord.values())
+
+
 if __name__ == '__main__':
     pass
