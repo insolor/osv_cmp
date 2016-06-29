@@ -140,7 +140,7 @@ def osv_compare(*osv):
     for acc in osv[0]:
         if acc in osv[1]:
             records = [osv[i][acc] for i in range(2)]
-            if list(records[0].keys()) == list(records[1].keys()):
+            if set(records[0].keys()) == set(records[1].keys()):
                 continue
             diffs[acc] = symm_diff_dicts(records[0], records[1])
     diff_records = diffs
