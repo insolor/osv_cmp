@@ -169,7 +169,7 @@ def osv_compare(*osv):
 
 def sum_lists(s):
     s = iter(s)
-    x = next(s)
+    x = list(next(s))
     for row in s:
         assert len(x) == len(row), "Row lengths must be the same"
         for i, item in enumerate(row):
