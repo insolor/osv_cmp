@@ -72,7 +72,11 @@ def load_osv_smeta(sheet: xlrd.sheet.Sheet):
             current_acc = key
             sheet_dict[current_acc] = OrderedDict()
         else:
-            assert current_acc is not None, "line #%d" % (i+1)
+            if current_acc is None:
+                log.append("Не удалось определить текущий счет, строка #%d.\n"
+                           "Возможно, при формировании оборотно-сальдовой ведомости не были выбраны "
+                           "необходимые пункты группировки. Загрузка прервана." % (i + 1))
+                return None, log
 
             if key and '.' not in key:
                 log.append("КБК %r без точек в счете %s, строка #%d. "
