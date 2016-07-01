@@ -178,7 +178,7 @@ def sum_lists(s):
 
 
 def osv_sum(osv: dict):
-    return sum_lists(operations for subrecord in osv.values() for operations in subrecord.values())
+    return sum_lists(operations[:6] for subrecord in osv.values() for operations in subrecord.values())
 
 
 if __name__ == '__main__':
