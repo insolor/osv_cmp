@@ -102,11 +102,11 @@ class App(tk.Tk):
         else:
             self.report.print('Различия в наборе счетов:')
             
-            for item in diffs['accs'][0]:
-                self.report.print('- %r' % item)
-            
-            for item in diffs['accs'][1]:
-                self.report.print('+ %r' % item)
+            for i, sign in enumerate(('-', '+')):
+                for item in diffs['accs'][i]:
+                    self.report.print('%s %r' % (sign, item))
+                    for subrecord, values in self.osv[i][item].items():
+                        self.report.print('   %-22r [%s]' % (subrecord, ', '.join('%.2f' % n for n in values)))
         
         self.report.print('\nСравнение набора подчиненных записей для каждого счета из исходного документа:')
         diff_records = diffs['records']
