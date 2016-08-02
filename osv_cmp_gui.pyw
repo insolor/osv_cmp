@@ -31,6 +31,7 @@ class App(tk.Tk):
 
         wb = xlrd.open_workbook(filename, formatting_info=True)
         sheet = wb.sheet_by_index(0)
+        sheet = [sheet.row_values(i) for i in range(sheet.nrows)]
 
         fmt = check_format(sheet)
         self.reports[i].print("Формат: %s" % fmt)

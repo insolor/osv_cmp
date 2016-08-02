@@ -1,29 +1,26 @@
-import xlrd
-
 from collections import OrderedDict
 
 
-def load_osv_1c(sheet: xlrd.sheet.Sheet):
+def load_osv_1c(sheet):
     log = []
     sheet_dict = OrderedDict()
     current_kfo = 0
     current_acc = None
     
     start = None
-    for i in range(0, sheet.nrows):
-        if sheet.row_values(i)[0] == 'КПС':
+    for i, row in enumerate(sheet):
+        if row[0] == 'КПС':
             start = i+1
             break
     
-    for i in range(start, sheet.nrows):
-        row = sheet.row_values(i)
+    for i, row in enumerate(sheet[start:]):
         key = row[0]
         row = [0.0 if not item else item for item in (row[3], row[6], row[9], row[14], row[16], row[19])]
         assert current_acc is None or 'None' not in current_acc, 'Line #%d' % i
         if key == 'Итого':
             break
         elif isinstance(key, float):
-            next_key = str(sheet.row_values(i + 1)[0]) if i < sheet.nrows - 1 else ''
+            next_key = str(sheet[i + 1][0]) if i < len(sheet) - 1 else ''
             if current_kfo < int(key) <= 5 and not next_key.startswith('%02d' % key):
                 current_kfo = int(key)
             else:
@@ -55,12 +52,11 @@ def load_osv_1c(sheet: xlrd.sheet.Sheet):
     return sheet_dict, log
 
 
-def load_osv_smeta(sheet: xlrd.sheet.Sheet):
+def load_osv_smeta(sheet):
     log = []
     sheet_dict = OrderedDict()
     current_acc = None
-    for i in range(8, sheet.nrows):
-        row = sheet.row_values(i)
+    for i, row in enumerate(sheet[8:]):
         key = row[0].strip()
 
         parts = key.count('.') + 1
@@ -102,9 +98,9 @@ def load_osv_smeta(sheet: xlrd.sheet.Sheet):
 
 
 def check_format(sheet: xlrd.sheet.Sheet):
-    if any(sheet.row_values(i)[0].startswith('Оборотно-сальдовая ведомость') for i in range(2)):
+    if any(sheet[i][0].startswith('Оборотно-сальдовая ведомость') for i in range(2)):
         return '1c'
-    elif sheet.row_values(1)[0] == 'ОБОРОТНО-САЛЬДОВАЯ ВЕДОМОСТЬ':
+    elif sheet[1][0] == 'ОБОРОТНО-САЛЬДОВАЯ ВЕДОМОСТЬ':
         return 'Smeta'
     else:
         return 'unknown'
