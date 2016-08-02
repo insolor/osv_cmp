@@ -97,7 +97,7 @@ def load_osv_smeta(sheet):
     return sheet_dict, log
 
 
-def check_format(sheet: xlrd.sheet.Sheet):
+def check_format(sheet):
     if any(sheet[i][0].startswith('Оборотно-сальдовая ведомость') for i in range(2)):
         return '1c'
     elif sheet[1][0] == 'ОБОРОТНО-САЛЬДОВАЯ ВЕДОМОСТЬ':
