@@ -80,7 +80,7 @@ def load_osv_smeta(sheet):
 
             key = ''.join(key.split('.'))
 
-            if len(key) == 20 and key.startswith('000'):
+            if len(key) == 20:
                 key = key[3:]
             
             if key in sheet_dict[current_acc]:
