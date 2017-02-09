@@ -1,6 +1,32 @@
 from collections import OrderedDict
 
 
+class KBK:
+    def __init__(self, s):
+        self.original = str(s)
+    
+    @staticmethod
+    def normalize(kbk):
+        key = ''.join(str(kbk).split('.'))
+        if len(key) == 20:
+            key = key[3:]
+        print(kbk, key)
+        return key
+    
+    @property
+    def normalized(self):
+        return KBK.normalize(self.original)
+    
+    def __str__(self):
+        return self.original
+    
+    def __eq__(self, other):
+        return self.normalized == KBK.normalize(str(other))
+    
+    def __hash__(self):
+        return self.normalized.__hash__()
+
+
 def load_osv_1c(sheet):
     log = []
     sheet_dict = OrderedDict()
