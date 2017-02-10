@@ -167,6 +167,9 @@ def osv_compare(*osv):
             diffs[acc] = symm_diff_dicts(records[0], records[1])
     diff_records = diffs
     
+    def money_is_equal(x, y, eps=0.001):
+        return abs(x - y) < eps
+    
     # Compare sums
     diffs = OrderedDict()
     for acc in osv[0]:
@@ -176,7 +179,7 @@ def osv_compare(*osv):
                     row2 = osv[1][acc][record]
                     if row[:4] == row2[:4]:
                         continue
-                    elif (row[0]-row[1], row[2]-row[3]) == (row2[0]-row2[1], row2[2]-row2[3]):
+                    elif money_is_equal(row[0]-row[1], row2[0]-row2[1]) and money_is_equal(row[2]-row[3], row2[2]-row2[3]):
                         continue
                     else:
                         if acc not in diffs:
