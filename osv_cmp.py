@@ -2,8 +2,9 @@ from collections import OrderedDict
 
 
 class KBK:
-    def __init__(self, s):
+    def __init__(self, s, suffix=''):
         self.original = str(s)
+        self.suffix = suffix
     
     @staticmethod
     def normalize(kbk):
@@ -14,13 +15,13 @@ class KBK:
     
     @property
     def normalized(self):
-        return KBK.normalize(self.original)
+        return KBK.normalize(self.original) + self.suffix
     
     def __str__(self):
-        return self.original
+        return self.original + self.suffix
 
     def __repr__(self):
-        return self.original
+        return repr(self.original) + self.suffix
     
     def __eq__(self, other):
         return self.normalized == KBK.normalize(str(other))
@@ -117,10 +118,10 @@ def load_osv_smeta(sheet):
             if key in sheet_dict[current_acc]:
                 log.append("Дублирующаяся запись %r в счете %s, строка #%d" % (key, current_acc, i + 1))
                 j = 1
-                candidate = '%s_%d' % (key, j)
+                candidate = KBK(key, '(%s)' % j)
                 while candidate in sheet_dict[current_acc]:
                     j += 1
-                    candidate = '%s_%d' % (key, j)
+                    candidate = KBK(key, '(%s)' % j)
                 key = candidate
             
             sheet_dict[current_acc][key] = row[1:]
