@@ -18,6 +18,9 @@ class KBK:
     
     def __str__(self):
         return self.original
+
+    def __repr__(self):
+        return self.original
     
     def __eq__(self, other):
         return self.normalized == KBK.normalize(str(other))
@@ -86,14 +89,15 @@ def load_osv_smeta(sheet):
         key = row[0].strip()
 
         parts = key.count('.') + 1
+        key_plain = ''.join(key.split('.'))
         if key.startswith('Итого'):
             break
-        elif parts == 1 and 0 < len(key) < 17:
-            pass
-        elif 1 < parts <= 3 and len(key) < 17 or 'Н' in key:
-            current_acc = key
+        elif parts == 1 and 0 < len(key_plain) < 17:
+            pass  # КФО
+        elif 1 < parts <= 3 and len(key_plain) < 17 or 'Н' in key:
+            current_acc = key  # Счет
             sheet_dict[current_acc] = OrderedDict()
-        else:
+        else:  # КБК или пусто
             if current_acc is None:
                 log.append("Не удалось определить текущий счет, строка #%d.\n"
                            "Возможно, при формировании оборотно-сальдовой ведомости не были выбраны "
@@ -107,13 +111,11 @@ def load_osv_smeta(sheet):
             head = key.partition('.')[0]
             if len(head) == 3:
                 heads.add(head)
-            key = ''.join(key.split('.'))
 
-            if len(key) == 20:
-                key = key[3:]
+            key = KBK(key)
             
             if key in sheet_dict[current_acc]:
-                log.append("Дублирующуяся запись %r в счете %s, строка #%d" % (key, current_acc, i + 1))
+                log.append("Дублирующаяся запись %r в счете %s, строка #%d" % (key, current_acc, i + 1))
                 j = 1
                 candidate = '%s_%d' % (key, j)
                 while candidate in sheet_dict[current_acc]:
