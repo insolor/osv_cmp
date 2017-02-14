@@ -120,7 +120,7 @@ class App(tk.Tk):
                     set(('+', item, tuple(values[:4])) for item, values in new.items())
                 
                 for sign, item, values in sorted(s, key=lambda x: (x[2], -ord(x[0]), x[1])):
-                    self.report.print(' %s %-22r [%s, ...]' % (sign, item, ', '.join('%.2f' % n for n in values)))
+                    self.report.print(' %s %-30r [%s, ...]' % (sign, item, ', '.join('%.2f' % n for n in values)))
         
         self.report.print('\nСравнение сумм:')
         diff_sums = diffs['sums']
