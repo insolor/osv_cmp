@@ -10,7 +10,6 @@ class KBK:
         key = ''.join(str(kbk).split('.'))
         if len(key) == 20:
             key = key[3:]
-        print(kbk, key)
         return key
     
     @property
