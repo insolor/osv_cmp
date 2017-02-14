@@ -160,7 +160,7 @@ class App(tk.Tk):
 
                 button = ttk.Button(parent, text='X')
                 button.grid(column=2, row=i)
-                button.bind('<1>', lambda event, i=i: self.bt_clear_entry(event, i))
+                button.bind('<1>', lambda event, n=i: self.bt_clear_entry(event, n))
             
             button = ttk.Button(parent, text='Загрузить/\nперечитать')
             button.grid(column=3, row=0, rowspan=2, sticky=tk.NS)
