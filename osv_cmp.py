@@ -81,6 +81,7 @@ def load_osv_smeta(sheet):
     log = []
     sheet_dict = OrderedDict()
     current_acc = None
+    heads = set()
     for i, row in enumerate(sheet[8:]):
         key = row[0].strip()
 
@@ -103,6 +104,9 @@ def load_osv_smeta(sheet):
                 log.append("КБК %r без точек в счете %s, строка #%d. "
                            "Необходимо заполнить поля данного КБК в Смете-СМАРТ." % (key, current_acc, i + 1))
 
+            head = key.partition('.')[0]
+            if len(head) == 3:
+                heads.add(head)
             key = ''.join(key.split('.'))
 
             if len(key) == 20:
@@ -119,6 +123,7 @@ def load_osv_smeta(sheet):
             
             sheet_dict[current_acc][key] = row[1:]
 
+    log.append("Коды главы в оборотно-сальдовой ведомости: {}\n".format(', '.join(heads)))
     return sheet_dict, log
 
 
