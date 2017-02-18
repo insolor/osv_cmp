@@ -17,6 +17,9 @@ class KBK:
     def normalized(self):
         return KBK.normalize(self.original) + self.suffix
     
+    def __len__(self):
+        return len(''.join(self.original.split('.')))
+    
     def __str__(self):
         return self.original + self.suffix
 
@@ -105,10 +108,16 @@ def load_osv_smeta(sheet):
                            "необходимые пункты группировки. Загрузка прервана." % (i + 1))
                 return None, log
 
-            if key and '.' not in key:
-                log.append("КБК %r без точек в счете %s, строка #%d. "
-                           "Необходимо заполнить поля данного КБК в Смете-СМАРТ." % (key, current_acc, i + 1))
-
+            if key:
+                if '.' not in key:
+                    log.append("КБК %r без точек в счете %s, строка #%d. "
+                               "Необходимо заполнить поля данного КБК в Смете-СМАРТ." % (key, current_acc, i + 1))
+                
+                if len(key) == 17:
+                    log.append("Слишком короткий (старый) КБК: '%s' (%d цифр) в счете %s, строка #%d" % (key, len(key), current_acc, i + 1))
+                elif len(key) < 20:
+                    log.append("Слишком короткий КБК: '%s' (%d цифр) в счете %s, строка #%d" % (key, len(key), current_acc, i + 1))
+            
             head = key.partition('.')[0]
             if len(head) == 3:
                 heads.add(head)
