@@ -163,8 +163,8 @@ class App(tk.Tk):
             button = ttk.Button(parent, text='Загрузить/\nперечитать', command=self.bt_reread)
             button.grid(column=3, row=0, rowspan=2, sticky=tk.NS)
 
-            button = ttk.Button(parent, text='Сравнить')
-            button.grid(column=4, row=0, rowspan=2, sticky=tk.NS, command=self.bt_compare)
+            button = ttk.Button(parent, text='Сравнить', command=self.bt_compare)
+            button.grid(column=4, row=0, rowspan=2, sticky=tk.NS)
         
         def init_report_area(parent):
             scrollbar = ttk.Scrollbar(parent)
