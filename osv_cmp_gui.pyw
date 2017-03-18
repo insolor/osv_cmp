@@ -28,11 +28,11 @@ def process_row(row, book: xlrd.book.Book):
         if isinstance(c.value, str) or '0' not in format_str:
             yield c.value
         else:
-            f = re.search(r'(0+)(\.(0+))?', format_str)
+            f = re.search(r'(0+)(\.0+)?', format_str)
             integer_part = f.group(1)
-            fraction_part = f.group(3) or ''
+            fraction_part = f.group(2) or ''
             result = '{:0{width}.{fraction}f}'.format(
-                c.value, width=len(integer_part+fraction_part)+1, fraction=len(fraction_part))
+                c.value, width=len(integer_part)+len(fraction_part), fraction=len(fraction_part))
             assert abs(float(result) - c.value) < 0.1 ** len(fraction_part)
             yield result
 
@@ -129,7 +129,7 @@ class App(tk.Tk):
                 for item in diffs['accs'][i]:
                     self.report.print('%s %r' % (sign, item))
                     for subrecord, values in self.osv[i][item].items():
-                        self.report.print('   %-22r [%s]' % (subrecord, ', '.join('%.2f' % float(n) for n in values)))
+                        self.report.print('   %-22r [%s]' % (subrecord, ', '.join('%.2f' % n for n in values)))
         
         self.report.print('\nСравнение набора подчиненных записей для каждого счета из исходного документа:')
         diff_records = diffs['records']

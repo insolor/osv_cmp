@@ -28,6 +28,9 @@ class KBK:
     
     def __eq__(self, other):
         return self.normalized == KBK.normalize(str(other))
+
+    def __lt__(self, other):
+        return self.normalized < KBK.normalize(str(other))
     
     def __hash__(self):
         return self.normalized.__hash__()
@@ -47,27 +50,11 @@ def load_osv_1c(sheet):
     
     for i, row in enumerate(sheet[start:]):
         key = row[0]
-        row = [0.0 if not item else item for item in (row[3], row[6], row[9], row[14], row[16], row[19])]
+        row = [float(item) if item else 0.0 for item in (row[3], row[6], row[9], row[14], row[16], row[19])]
         assert current_acc is None or 'None' not in current_acc, 'Line #%d' % i
         if key == 'Итого':
             break
-        elif isinstance(key, float):
-            next_key = str(sheet[i + 1][0]) if i < len(sheet) - 1 else ''
-            if current_kfo < int(key) <= 5 and not next_key.startswith('%02d' % key):
-                current_kfo = int(key)
-            else:
-                current_acc = '%02d' % key
-                acc = '%s.%s' % (current_kfo, current_acc)
-                if acc in sheet_dict:
-                    value = sheet_dict[acc]
-                    new_acc = '%s.%03d' % (current_kfo, key)
-                    sheet_dict[new_acc] = value
-                    del(sheet_dict[acc])
-        elif '.' in key or 'Н' in key or key == 'ОЦИ':
-            current_acc = key
-        elif current_acc is None:
-            current_kfo = 0
-        else:
+        elif key == '' or len(key) > 6:  # КПС или пусто
             acc = '%s.%s' % (current_kfo, current_acc)
             if acc not in sheet_dict:
                 sheet_dict[acc] = OrderedDict()
@@ -81,6 +68,11 @@ def load_osv_1c(sheet):
                     candidate = '%s_%d' % (key, j)
                 key = candidate
             sheet_dict[acc][key] = row
+        elif len(key) == 1:  # КФО
+            current_kfo = key
+        else:  # Счет
+            current_acc = key
+
     return sheet_dict, log
 
 
@@ -133,7 +125,7 @@ def load_osv_smeta(sheet):
                     candidate = KBK(key, '(%s)' % j)
                 key = candidate
             
-            sheet_dict[current_acc][key] = row[1:]
+            sheet_dict[current_acc][key] = [float(item) for item in row[1:]]
 
     log.append("Коды главы в оборотно-сальдовой ведомости: {}\n".format(', '.join(heads)))
     return sheet_dict, log
@@ -213,7 +205,7 @@ def sum_lists(s):
     for row in s:
         assert len(x) == len(row), "Row lengths must be the same"
         for i, item in enumerate(row):
-            x[i] = float(x[i]) + float(item)
+            x[i] = x[i] + item
     return x
 
 
