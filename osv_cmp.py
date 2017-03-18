@@ -209,12 +209,11 @@ def osv_compare(*osv):
 
 
 def sum_lists(s):
-    s = iter(s)
     x = list(next(s))
     for row in s:
         assert len(x) == len(row), "Row lengths must be the same"
         for i, item in enumerate(row):
-            x[i] += item
+            x[i] = float(x[i]) + float(item)
     return x
 
 

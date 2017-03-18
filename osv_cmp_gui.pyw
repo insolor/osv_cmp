@@ -3,6 +3,7 @@ import tkinter as tk
 import tkinter.ttk as ttk
 import tkinter.messagebox as messagebox
 import xlrd
+import re
 
 from tkinter import filedialog
 from osv_cmp import load_osv_smeta, load_osv_1c, check_format, osv_compare, osv_sum
@@ -19,6 +20,23 @@ class Report(tk.Text):
         self.insert(tk.END, sep.join(str(item) for item in objects) + end)
 
 
+def process_row(row, book: xlrd.book.Book):
+    for c in row:  # type: xlrd.sheet.Cell
+        xf = book.xf_list[c.xf_index]
+        fmt_obj = book.format_map[xf.format_key]
+        format_str = fmt_obj.format_str  # type: str
+        if isinstance(c.value, str) or '0' not in format_str:
+            yield c.value
+        else:
+            f = re.search(r'(0+)(\.(0+))?', format_str)
+            integer_part = f.group(1)
+            fraction_part = f.group(3) or ''
+            result = '{:0{width}.{fraction}f}'.format(
+                c.value, width=len(integer_part+fraction_part)+1, fraction=len(fraction_part))
+            assert abs(float(result) - c.value) < 0.1 ** len(fraction_part)
+            yield result
+
+
 class App(tk.Tk):
     def load_file(self, filename, i):
         self.reports[i].clear()
@@ -30,15 +48,20 @@ class App(tk.Tk):
 
         wb = xlrd.open_workbook(filename, formatting_info=True)
         sheet = wb.sheet_by_index(0)
-        sheet = [sheet.row_values(i) for i in range(sheet.nrows)]
 
-        fmt = check_format(sheet)
+        rows = [sheet.row_values(i) for i in range(sheet.nrows)]
+        rows = [
+            list(process_row(sheet.row(i), wb))
+            for i in range(sheet.nrows)
+        ]
+
+        fmt = check_format(rows)
         self.reports[i].print("Формат: %s" % fmt)
 
         if fmt == '1c':
-            osv, log = load_osv_1c(sheet)
+            osv, log = load_osv_1c(rows)
         elif fmt == 'Smeta':
-            osv, log = load_osv_smeta(sheet)
+            osv, log = load_osv_smeta(rows)
         else:
             self.report.print("Формат документа не опознан. Загрузка прекращена.")
             return None
@@ -106,7 +129,7 @@ class App(tk.Tk):
                 for item in diffs['accs'][i]:
                     self.report.print('%s %r' % (sign, item))
                     for subrecord, values in self.osv[i][item].items():
-                        self.report.print('   %-22r [%s]' % (subrecord, ', '.join('%.2f' % n for n in values)))
+                        self.report.print('   %-22r [%s]' % (subrecord, ', '.join('%.2f' % float(n) for n in values)))
         
         self.report.print('\nСравнение набора подчиненных записей для каждого счета из исходного документа:')
         diff_records = diffs['records']
