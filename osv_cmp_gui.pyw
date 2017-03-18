@@ -56,7 +56,7 @@ class App(tk.Tk):
 
         return osv
 
-    def bt_pick_file(self, _, i):
+    def bt_pick_file(self, i):
         self.filename[i] = filedialog.askopenfilename(filetypes=[('Документ Excel', '*.xls')])
         if not self.filename[i]:
             return
@@ -67,13 +67,13 @@ class App(tk.Tk):
 
         self.osv[i] = self.load_file(self.filename[i], i)
 
-    def bt_clear_entry(self, _, i):
+    def bt_clear_entry(self, i):
         self.entry[i].delete(0, tk.END)
         self.filename[i] = ''
         self.osv[i] = None
         self.reports[i].clear()
 
-    def bt_reread(self, _):
+    def bt_reread(self):
         for i in range(2):
             self.filename[i] = self.entry[i].get()
             self.osv[i] = self.load_file(self.filename[i], i)
@@ -81,7 +81,7 @@ class App(tk.Tk):
         self.reports[2].clear()
         self.notebook.select(0)
     
-    def bt_compare(self, _):
+    def bt_compare(self):
         if not (self.osv[0] and self.osv[1]):
             messagebox.showwarning('Нужно два документа',
                                    'Для сравнения нужно загрузить два документа')
@@ -136,7 +136,7 @@ class App(tk.Tk):
                     self.report.print('  +++ | %15.2f | %15.2f | %15.2f | %15.2f | ...' % tuple(diff[1]))
                     self.report.print()
 
-    def bt_save_report(self, _):
+    def bt_save_report(self):
         if not any(part.get(1.0, tk.END).strip() for part in self.reports):
             messagebox.showwarning('Пустой отчет', 'Отчет пуст: не загружен ни один файл и не произведено сравнение')
             return
@@ -148,27 +148,23 @@ class App(tk.Tk):
     
     def __init__(self):
         def init_header(parent):
-            self.entry = [None, None]
+            self.entry = [ttk.Entry(parent, width=100) for _ in range(2)]
             
             for i in range(2):
-                button = ttk.Button(parent, text='Выбрать файл %d' % (i+1))
+                button = ttk.Button(parent, text='Выбрать файл %d' % (i+1),
+                                    command=lambda j=i: self.bt_pick_file(j))
                 button.grid(column=0, row=i)
-                button.bind('<1>', lambda event, i=i: self.bt_pick_file(event, i))
 
-                self.entry[i] = ttk.Entry(parent, width=100)
                 self.entry[i].grid(column=1, row=i, sticky=tk.EW)
 
-                button = ttk.Button(parent, text='X')
+                button = ttk.Button(parent, text='X', command=lambda j=i: self.bt_clear_entry(j))
                 button.grid(column=2, row=i)
-                button.bind('<1>', lambda event, n=i: self.bt_clear_entry(event, n))
             
-            button = ttk.Button(parent, text='Загрузить/\nперечитать')
+            button = ttk.Button(parent, text='Загрузить/\nперечитать', command=self.bt_reread)
             button.grid(column=3, row=0, rowspan=2, sticky=tk.NS)
-            button.bind('<1>', self.bt_reread)
 
             button = ttk.Button(parent, text='Сравнить')
-            button.grid(column=4, row=0, rowspan=2, sticky=tk.NS)
-            button.bind('<1>', self.bt_compare)
+            button.grid(column=4, row=0, rowspan=2, sticky=tk.NS, command=self.bt_compare)
         
         def init_report_area(parent):
             scrollbar = ttk.Scrollbar(parent)
@@ -182,9 +178,8 @@ class App(tk.Tk):
             return report
         
         def init_footer(parent):
-            button = ttk.Button(parent, text='Сохранить отчет')
+            button = ttk.Button(parent, text='Сохранить отчет', command=self.bt_save_report)
             button.pack()
-            button.bind('<1>', self.bt_save_report)
 
         def init_notebook(*tabs):
             notebook = ttk.Notebook()
