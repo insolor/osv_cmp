@@ -81,9 +81,15 @@ def load_osv_smeta(sheet):
     sheet_dict = OrderedDict()
     current_acc = None
     heads = set()
-    for i, row in enumerate(sheet[8:]):
-        key = row[0].strip()
 
+    start = None
+    for i, row in enumerate(sheet):
+        if row[0] == 'Субсчет':
+            start = i+2
+            break
+
+    for i, row in enumerate(sheet[start:]):
+        key = row[0].strip()
         parts = key.count('.') + 1
         key_plain = ''.join(key.split('.'))
         if key.startswith('Итого'):

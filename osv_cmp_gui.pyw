@@ -49,7 +49,6 @@ class App(tk.Tk):
         wb = xlrd.open_workbook(filename, formatting_info=True)
         sheet = wb.sheet_by_index(0)
 
-        rows = [sheet.row_values(i) for i in range(sheet.nrows)]
         rows = [
             list(process_row(sheet.row(i), wb))
             for i in range(sheet.nrows)
