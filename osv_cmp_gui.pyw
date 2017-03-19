@@ -16,8 +16,14 @@ class Report(tk.Text):
     def clear(self):
         self.delete(0.0, tk.END)
 
-    def print(self, *objects, sep=' ', end='\n'):
-        self.insert(tk.END, sep.join(str(item) for item in objects) + end)
+    def write(self, s: str):
+        self.insert(tk.END, s)
+
+    def flush(self):
+        pass
+
+    def print(self, *args, **kwargs):
+        print(*args, file=self, **kwargs)
 
 
 def process_row(row, book: xlrd.book.Book):
