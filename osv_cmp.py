@@ -39,7 +39,7 @@ class KBK:
 
 def load_osv_1c(rows: Sequence):
     log = []
-    sheet_dict = OrderedDict()
+    data_dict = OrderedDict()
     current_kfo = 0
     current_acc = None
     
@@ -57,29 +57,29 @@ def load_osv_1c(rows: Sequence):
             break
         elif key == '' or len(key) > 6:  # КПС или пусто
             acc = '%s.%s' % (current_kfo, current_acc)
-            if acc not in sheet_dict:
-                sheet_dict[acc] = OrderedDict()
+            if acc not in data_dict:
+                data_dict[acc] = OrderedDict()
 
-            if key in sheet_dict[acc]:
+            if key in data_dict[acc]:
                 log.append("Дублирующуяся запись %r в счете %s, строка #%d" % (key, acc, i + 1))
                 j = 1
                 candidate = '%s_%d' % (key, j)
-                while candidate in sheet_dict[acc]:
+                while candidate in data_dict[acc]:
                     j += 1
                     candidate = '%s_%d' % (key, j)
                 key = candidate
-            sheet_dict[acc][key] = row
+            data_dict[acc][key] = row
         elif len(key) == 1:  # КФО
             current_kfo = key
         else:  # Счет
             current_acc = key
 
-    return sheet_dict, log
+    return data_dict, log
 
 
 def load_osv_smeta(rows: Sequence):
     log = []
-    sheet_dict = OrderedDict()
+    data_dict = OrderedDict()
     current_acc = None
     heads = set()
 
@@ -99,7 +99,7 @@ def load_osv_smeta(rows: Sequence):
             pass  # КФО
         elif 1 < parts <= 3 and len(key_plain) < 17 or 'Н' in key:
             current_acc = key  # Счет
-            sheet_dict[current_acc] = OrderedDict()
+            data_dict[current_acc] = OrderedDict()
         else:  # КБК или пусто
             if current_acc is None:
                 log.append("Не удалось определить текущий счет, строка #%d.\n"
@@ -125,19 +125,19 @@ def load_osv_smeta(rows: Sequence):
 
             key = KBK(key)
             
-            if key in sheet_dict[current_acc]:
+            if key in data_dict[current_acc]:
                 log.append("Дублирующаяся запись %r в счете %s, строка #%d" % (key, current_acc, i + 1))
                 j = 1
                 candidate = KBK(key, '(%s)' % j)
-                while candidate in sheet_dict[current_acc]:
+                while candidate in data_dict[current_acc]:
                     j += 1
                     candidate = KBK(key, '(%s)' % j)
                 key = candidate
             
-            sheet_dict[current_acc][key] = [float(item) for item in row[1:]]
+            data_dict[current_acc][key] = [float(item) for item in row[1:]]
 
     log.append("Коды главы в оборотно-сальдовой ведомости: {}\n".format(', '.join(heads)))
-    return sheet_dict, log
+    return data_dict, log
 
 
 def check_format(rows: Sequence):
