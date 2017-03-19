@@ -33,7 +33,7 @@ def process_row(row, book: xlrd.book.Book):
             fraction_part = f.group(2) or ''
             result = '{:0{width}.{fraction}f}'.format(
                 c.value, width=len(integer_part)+len(fraction_part), fraction=len(fraction_part))
-            assert abs(float(result) - c.value) < 0.1 ** len(fraction_part)
+            assert abs(float(result) - c.value) < 0.1 ** (len(fraction_part) - 1)
             yield result
 
 
