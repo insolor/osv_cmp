@@ -111,11 +111,11 @@ def load_osv_smeta(rows: Sequence):
                 if '.' not in key:
                     log.append("КБК %r без точек в счете %s, строка #%d. "
                                "Необходимо заполнить поля данного КБК в Смете-СМАРТ." % (key, current_acc, i + 1))
-                
-                if len(key) == 17:
-                    log.append("Слишком короткий (старый) КБК: '%s' (%d цифр) в счете %s, строка #%d" % (key, len(key), current_acc, i + 1))
-                elif len(key) < 20:
-                    log.append("Слишком короткий КБК: '%s' (%d цифр) в счете %s, строка #%d" % (key, len(key), current_acc, i + 1))
+
+                if len(key_plain) == 17:
+                    log.append("Слишком короткий (старый) КБК: '%s' (%d цифр) в счете %s, строка #%d" % (key, len(key_plain), current_acc, i + 1))
+                elif len(key_plain) < 20:
+                    log.append("Слишком короткий КБК: '%s' (%d цифр) в счете %s, строка #%d" % (key, len(key_plain), current_acc, i + 1))
             
             head = key.partition('.')[0]
             if len(head) == 3:
