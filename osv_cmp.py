@@ -1,4 +1,5 @@
 from collections import OrderedDict
+from collections.abc import *
 
 
 class KBK:
@@ -36,19 +37,19 @@ class KBK:
         return self.normalized.__hash__()
 
 
-def load_osv_1c(sheet):
+def load_osv_1c(rows: Sequence):
     log = []
     sheet_dict = OrderedDict()
     current_kfo = 0
     current_acc = None
     
     start = None
-    for i, row in enumerate(sheet):
+    for i, row in enumerate(rows):
         if row[0] == 'КПС':
             start = i+1
             break
     
-    for i, row in enumerate(sheet[start:]):
+    for i, row in enumerate(rows[start:]):
         key = row[0]
         row = [float(item) if item else 0.0 for item in (row[3], row[6], row[9], row[14], row[16], row[19])]
         assert current_acc is None or 'None' not in current_acc, 'Line #%d' % i
@@ -76,19 +77,19 @@ def load_osv_1c(sheet):
     return sheet_dict, log
 
 
-def load_osv_smeta(sheet):
+def load_osv_smeta(rows: Sequence):
     log = []
     sheet_dict = OrderedDict()
     current_acc = None
     heads = set()
 
     start = None
-    for i, row in enumerate(sheet):
+    for i, row in enumerate(rows):
         if row[0] == 'Субсчет':
             start = i+2
             break
 
-    for i, row in enumerate(sheet[start:]):
+    for i, row in enumerate(rows[start:]):
         key = row[0].strip()
         parts = key.count('.') + 1
         key_plain = ''.join(key.split('.'))
@@ -137,16 +138,16 @@ def load_osv_smeta(sheet):
     return sheet_dict, log
 
 
-def check_format(sheet):
-    if any(sheet[i][0].startswith('Оборотно-сальдовая ведомость') for i in range(2)):
+def check_format(rows: Sequence):
+    if any(rows[i][0].startswith('Оборотно-сальдовая ведомость') for i in range(2)):
         return '1c'
-    elif sheet[1][0] == 'ОБОРОТНО-САЛЬДОВАЯ ВЕДОМОСТЬ':
+    elif rows[1][0] == 'ОБОРОТНО-САЛЬДОВАЯ ВЕДОМОСТЬ':
         return 'Smeta'
     else:
         return 'unknown'
 
 
-def symm_diff_dicts(d1, d2):
+def symm_diff_dicts(d1: dict, d2: dict):
     sd1 = set(d1.keys())
     sd2 = set(d2.keys())
     absent_keys = sd1 - sd2
@@ -206,7 +207,7 @@ def osv_compare(*osv):
     return dict(accs=diff_accs, records=diff_records, sums=diff_sums)
 
 
-def sum_lists(s):
+def sum_lists(s: iter):
     x = list(next(s))
     for row in s:
         assert len(x) == len(row), "Row lengths must be the same"
