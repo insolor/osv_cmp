@@ -73,6 +73,10 @@ def load_osv_1c(rows: Sequence):
             current_kfo = key
         else:  # Счет
             current_acc = key
+            if current_acc in {'109.61', '109.81'}:
+                print('Счет %s в оборотно-сальдовой ведомости. '
+                      'Для правильного переноса необходимо исправить на %s в плане счетов в 1С.' %
+                      (current_acc, current_acc[:-1]+'0'))
 
     return data_dict, log
 
