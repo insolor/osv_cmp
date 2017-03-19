@@ -113,9 +113,11 @@ def load_osv_smeta(rows: Sequence):
                                "Необходимо заполнить поля данного КБК в Смете-СМАРТ." % (key, current_acc, i + 1))
 
                 if len(key_plain) == 17:
-                    log.append("Слишком короткий (старый) КБК: '%s' (%d цифр) в счете %s, строка #%d" % (key, len(key_plain), current_acc, i + 1))
+                    log.append("Слишком короткий (старый) КБК: '%s' (%d цифр) в счете %s, строка #%d" %
+                               (key, len(key_plain), current_acc, i + 1))
                 elif len(key_plain) < 20:
-                    log.append("Слишком короткий КБК: '%s' (%d цифр) в счете %s, строка #%d" % (key, len(key_plain), current_acc, i + 1))
+                    log.append("Слишком короткий КБК: '%s' (%d цифр) в счете %s, строка #%d" %
+                               (key, len(key_plain), current_acc, i + 1))
             
             head = key.partition('.')[0]
             if len(head) == 3:
@@ -194,7 +196,8 @@ def osv_compare(*osv):
                     row2 = osv[1][acc][record]
                     if row[:4] == row2[:4]:
                         continue
-                    elif money_is_equal(row[0]-row[1], row2[0]-row2[1]) and money_is_equal(row[2]-row[3], row2[2]-row2[3]):
+                    elif (money_is_equal(row[0]-row[1], row2[0]-row2[1]) and
+                          money_is_equal(row[2]-row[3], row2[2]-row2[3])):
                         continue
                     else:
                         if acc not in diffs:
