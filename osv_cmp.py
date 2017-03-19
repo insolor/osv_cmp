@@ -40,6 +40,7 @@ class KBK:
 def load_osv_1c(rows: Sequence):
     log = []
     data_dict = OrderedDict()
+    current_dep = ''
     current_kfo = 0
     current_acc = None
     
@@ -50,29 +51,36 @@ def load_osv_1c(rows: Sequence):
             break
     
     for i, row in enumerate(rows[start:]):
-        key = row[0]
+        key = row[0]  # type: str
         row = [float(item) if item else 0.0 for item in (row[3], row[6], row[9], row[14], row[16], row[19])]
         assert current_acc is None or 'None' not in current_acc, 'Line #%d' % i
         if key == 'Итого':
             break
-        elif key == '' or len(key) > 6:  # КПС или пусто
-            acc = '%s.%s' % (current_kfo, current_acc)
-            if acc not in data_dict:
-                data_dict[acc] = OrderedDict()
+        elif ' ' in key:  # Наименование учреждения
+            current_dep = key
+        elif len(key) == 1 and key.isdigit():  # КФО (N)
+            current_kfo = key
+        elif key and len(key) <= 6:  # Счет (NNN.MM)
+            current_acc = key
+        elif len(key) <= 17:  # КПС или пусто (17N)
+            if current_dep not in data_dict:
+                data_dict[current_dep] = OrderedDict()
 
-            if key in data_dict[acc]:
+            current_section = data_dict[current_dep]
+
+            acc = '%s.%s' % (current_kfo, current_acc)
+            if acc not in current_section:
+                current_section[acc] = OrderedDict()
+
+            if key in current_section[acc]:
                 log.append("Дублирующуяся запись %r в счете %s, строка #%d" % (key, acc, i + 1))
                 j = 1
                 candidate = '%s_%d' % (key, j)
-                while candidate in data_dict[acc]:
+                while candidate in current_section[acc]:
                     j += 1
                     candidate = '%s_%d' % (key, j)
                 key = candidate
-            data_dict[acc][key] = row
-        elif len(key) == 1:  # КФО
-            current_kfo = key
-        else:  # Счет
-            current_acc = key
+            current_section[acc][key] = row
 
     return data_dict, log
 
@@ -80,6 +88,7 @@ def load_osv_1c(rows: Sequence):
 def load_osv_smeta(rows: Sequence):
     log = []
     data_dict = OrderedDict()
+    current_dep = ''
     current_acc = None
     heads = set()
 
@@ -95,29 +104,39 @@ def load_osv_smeta(rows: Sequence):
         key_plain = ''.join(key.split('.'))
         if key.startswith('Итого'):
             break
-        elif parts == 1 and 0 < len(key_plain) < 17:
-            pass  # КФО
-        elif 1 < parts <= 3 and len(key_plain) < 17 or 'Н' in key:
-            current_acc = key  # Счет
-            data_dict[current_acc] = OrderedDict()
-        else:  # КБК или пусто
+        elif len(key) == 1 and key.isdigit():  # КФО (N)
+            pass
+        elif parts <= 3 and 1 < len(key_plain) < 17:  # Счет 6 знаков (N.MMM.KK)
+            current_acc = key
+        elif ' ' in key:  # Наименование учреждения (считаем, что это несколько слов, разделенных пробелами)
+            current_dep = key
+        else:  # КБК или пусто (могут быть цифры, буквы, разделенные или не разделенные точками)
             if current_acc is None:
                 log.append("Не удалось определить текущий счет, строка #%d.\n"
                            "Возможно, при формировании оборотно-сальдовой ведомости не были выбраны "
                            "необходимые пункты группировки. Загрузка прервана." % (i + 1))
                 return None, log
 
+            if current_dep not in data_dict:
+                data_dict[current_dep] = OrderedDict()
+
+            current_section = data_dict[current_dep]
+
+            acc = current_acc
+            if acc not in current_section:
+                current_section[acc] = OrderedDict()
+
             if key:
                 if '.' not in key:
                     log.append("КБК %r без точек в счете %s, строка #%d. "
-                               "Необходимо заполнить поля данного КБК в Смете-СМАРТ." % (key, current_acc, i + 1))
+                               "Необходимо заполнить поля данного КБК в Смете-СМАРТ." % (key, acc, i + 1))
 
                 if len(key_plain) == 17:
                     log.append("Слишком короткий (старый) КБК: '%s' (%d цифр) в счете %s, строка #%d" %
-                               (key, len(key_plain), current_acc, i + 1))
+                               (key, len(key_plain), acc, i + 1))
                 elif len(key_plain) < 20:
                     log.append("Слишком короткий КБК: '%s' (%d цифр) в счете %s, строка #%d" %
-                               (key, len(key_plain), current_acc, i + 1))
+                               (key, len(key_plain), acc, i + 1))
             
             head = key.partition('.')[0]
             if len(head) == 3:
@@ -125,16 +144,16 @@ def load_osv_smeta(rows: Sequence):
 
             key = KBK(key)
             
-            if key in data_dict[current_acc]:
-                log.append("Дублирующаяся запись %r в счете %s, строка #%d" % (key, current_acc, i + 1))
+            if key in current_section[acc]:
+                log.append("Дублирующаяся запись %r в счете %s, строка #%d" % (key, acc, i + 1))
                 j = 1
                 candidate = KBK(key, '(%s)' % j)
-                while candidate in data_dict[current_acc]:
+                while candidate in current_section[acc]:
                     j += 1
                     candidate = KBK(key, '(%s)' % j)
                 key = candidate
             
-            data_dict[current_acc][key] = [float(item) for item in row[1:]]
+            current_section[acc][key] = [float(item) for item in row[1:]]
 
     log.append("Коды главы в оборотно-сальдовой ведомости: {}\n".format(', '.join(heads)))
     return data_dict, log
@@ -215,12 +234,15 @@ def sum_lists(s: iter):
     for row in s:
         assert len(x) == len(row), "Row lengths must be the same"
         for i, item in enumerate(row):
-            x[i] = x[i] + item
+            x[i] += item
     return x
 
 
 def osv_sum(osv: dict):
-    return sum_lists(operations[:6] for subrecord in osv.values() for operations in subrecord.values())
+    return sum_lists(operations[:6]
+                     for dep_accounts in osv.values()
+                     for account in dep_accounts.values()
+                     for operations in account.values())
 
 
 if __name__ == '__main__':

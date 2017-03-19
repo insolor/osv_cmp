@@ -70,12 +70,14 @@ class App(tk.Tk):
         else:
             self.report.print("Формат документа не опознан. Загрузка прекращена.")
             return None
-        
+
         self.reports[i].print(*log, sep='\n')
         
         self.reports[i].print("Файл загружен.")
-        self.reports[i].print("Загружено счетов: %d" % len(osv))
-        self.reports[i].print("Загружено подчиненных записей: %d" % sum(len(records) for records in osv.values()))
+        self.reports[i].print("Загружено учреждений: %d" % len(osv))
+        self.reports[i].print("Всего счетов: %d" % sum(len(accounts) for accounts in osv.values()))
+        self.reports[i].print("Всего подчиненных записей: %d" %
+                              sum(len(records) for accounts in osv.values() for records in accounts.values()))
 
         # todo: не учитывать забалансовые счета
         s = osv_sum(osv)
@@ -98,7 +100,7 @@ class App(tk.Tk):
     def bt_clear_entry(self, i):
         self.entry[i].delete(0, tk.END)
         self.filename[i] = ''
-        self.osv[i] = None
+        self.osv[i] = dict()
         self.reports[i].clear()
 
     def bt_reread(self):
@@ -123,46 +125,51 @@ class App(tk.Tk):
         self.notebook.select(2)
         self.report.clear()
 
-        diffs = osv_compare(*self.osv)
-        
-        if not diffs['accs']:
-            self.report.print('Различий в наборе загруженных счетов нет.')
-        else:
-            self.report.print('Различия в наборе счетов:')
-            
-            for i, sign in enumerate(('-', '+')):
-                for item in diffs['accs'][i]:
-                    self.report.print('%s %r' % (sign, item))
-                    for subrecord, values in self.osv[i][item].items():
-                        self.report.print('   %-22r [%s]' % (subrecord, ', '.join('%.2f' % n for n in values)))
-        
-        self.report.print('\nСравнение набора подчиненных записей для каждого счета из исходного документа:')
-        diff_records = diffs['records']
-        if not diff_records:
-            self.report.print('Различий нет.')
-        else:
-            for acc, (absent, new) in diff_records.items():
-                self.report.print('%s:' % acc)
-                
-                s = set(('-', item, tuple(values[:4])) for item, values in absent.items()) | \
-                    set(('+', item, tuple(values[:4])) for item, values in new.items())
-                
-                for sign, item, values in sorted(s, key=lambda x: (x[2], -ord(x[0]), x[1])):
-                    self.report.print(' %s %-30r [%s, ...]' % (sign, item, ', '.join('%.2f' % n for n in values)))
-        
-        self.report.print('\nСравнение сумм:')
-        diff_sums = diffs['sums']
-        if not diff_sums:
-            self.report.print('Недопустимых различий нет.')
-        else:
-            for acc, records in diff_sums.items():
-                self.report.print('%s:' % acc)
-                
-                for record, diff in records.items():
-                    self.report.print(' %r' % record)
-                    self.report.print('  --- | %15.2f | %15.2f | %15.2f | %15.2f | ...' % tuple(diff[0]))
-                    self.report.print('  +++ | %15.2f | %15.2f | %15.2f | %15.2f | ...' % tuple(diff[1]))
-                    self.report.print()
+        for department in zip(*self.osv):
+            if department[0]:
+                self.report.print('Учреждение 1: ' + department[0])
+                self.report.print('Учреждение 2: ' + department[1])
+
+            diffs = osv_compare(self.osv[0][department[0]], self.osv[1][department[1]])
+
+            if not diffs['accs']:
+                self.report.print('Различий в наборе загруженных счетов нет.')
+            else:
+                self.report.print('Различия в наборе счетов:')
+
+                for i, sign in enumerate(('-', '+')):
+                    for item in diffs['accs'][i]:
+                        self.report.print('%s %r' % (sign, item))
+                        for subrecord, values in self.osv[i][department[i]][item].items():
+                            self.report.print('   %-22r [%s]' % (subrecord, ', '.join('%.2f' % n for n in values)))
+
+            self.report.print('\nСравнение набора подчиненных записей для каждого счета из исходного документа:')
+            diff_records = diffs['records']
+            if not diff_records:
+                self.report.print('Различий нет.')
+            else:
+                for acc, (absent, new) in diff_records.items():
+                    self.report.print('%s:' % acc)
+
+                    s = set(('-', item, tuple(values[:4])) for item, values in absent.items()) | \
+                        set(('+', item, tuple(values[:4])) for item, values in new.items())
+
+                    for sign, item, values in sorted(s, key=lambda x: (x[2], -ord(x[0]), x[1])):
+                        self.report.print(' %s %-30r [%s, ...]' % (sign, item, ', '.join('%.2f' % n for n in values)))
+
+            self.report.print('\nСравнение сумм:')
+            diff_sums = diffs['sums']
+            if not diff_sums:
+                self.report.print('Недопустимых различий нет.')
+            else:
+                for acc, records in diff_sums.items():
+                    self.report.print('%s:' % acc)
+
+                    for record, diff in records.items():
+                        self.report.print(' %r' % record)
+                        self.report.print('  --- | %15.2f | %15.2f | %15.2f | %15.2f | ...' % tuple(diff[0]))
+                        self.report.print('  +++ | %15.2f | %15.2f | %15.2f | %15.2f | ...' % tuple(diff[1]))
+                        self.report.print()
 
     def bt_save_report(self):
         if not any(part.get(1.0, tk.END).strip() for part in self.reports):
@@ -233,7 +240,7 @@ class App(tk.Tk):
 
         self.report = self.reports[2]
         
-        self.osv = [None, None]
+        self.osv = [dict(), dict()]
         self.filename = [None, None]
 
 app = App()
