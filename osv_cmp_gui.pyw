@@ -1,11 +1,11 @@
 
 import tkinter as tk
 import tkinter.ttk as ttk
-import tkinter.messagebox as messagebox
 import xlrd
 import re
 
 from tkinter import filedialog
+from tkinter import messagebox
 from osv_cmp import load_osv_smeta, load_osv_1c, check_format, osv_compare, osv_sum
 
 
