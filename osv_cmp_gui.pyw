@@ -171,8 +171,11 @@ class App(tk.Tk):
 
         filename = filedialog.asksaveasfilename(filetypes=[('Текстовый документ', '*.txt')], defaultextension='.txt')
         if filename:
-            with open(filename, mode='wt') as fn:
-                print(('-' * 80 + '\n').join(part.get(1.0, tk.END) for part in self.reports), file=fn)
+            try:
+                with open(filename, mode='wt') as fn:
+                    print(('-' * 80 + '\n').join(part.get(1.0, tk.END) for part in self.reports), file=fn)
+            except PermissionError:
+                messagebox.showerror('Ошибка доступа', 'Не удалось сохранить отчет: ошибка доступа')
     
     def __init__(self):
         def init_header(parent):
