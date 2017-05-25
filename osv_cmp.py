@@ -56,7 +56,7 @@ def load_osv_1c(rows: Sequence):
         assert current_acc is None or 'None' not in current_acc, 'Line #%d' % i
         if key == 'Итого':
             break
-        elif ' ' in key:  # Наименование учреждения
+        elif ' ' in key or key.isalpha():  # Наименование учреждения
             current_dep = key
         elif len(key) == 1 and key.isdigit():  # КФО (N)
             current_kfo = key
