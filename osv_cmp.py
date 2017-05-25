@@ -104,12 +104,12 @@ def load_osv_smeta(rows: Sequence):
         key_plain = ''.join(key.split('.'))
         if key.startswith('Итого'):
             break
+        elif ' ' in key or key.isalpha():  # Наименование учреждения
+            current_dep = key
         elif len(key) == 1 and key.isdigit():  # КФО (N)
             pass
         elif parts <= 3 and 1 < len(key_plain) < 17:  # Счет 6 знаков (N.MMM.KK)
             current_acc = key
-        elif ' ' in key:  # Наименование учреждения (считаем, что это несколько слов, разделенных пробелами)
-            current_dep = key
         else:  # КБК или пусто (могут быть цифры, буквы, разделенные или не разделенные точками)
             if current_acc is None:
                 log.append("Не удалось определить текущий счет, строка #%d.\n"

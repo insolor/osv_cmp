@@ -75,6 +75,7 @@ class App(tk.Tk):
         
         self.reports[i].print("Файл загружен.")
         self.reports[i].print("Загружено учреждений: %d" % len(osv))
+        self.reports[i].print(list(osv.keys()))
         self.reports[i].print("Всего счетов: %d" % sum(len(accounts) for accounts in osv.values()))
         self.reports[i].print("Всего подчиненных записей: %d" %
                               sum(len(records) for accounts in osv.values() for records in accounts.values()))
