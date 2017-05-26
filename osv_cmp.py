@@ -58,8 +58,10 @@ def load_osv_1c(rows: Sequence):
             break
         elif ' ' in key or key.isalpha():  # Наименование учреждения
             current_dep = key
-        elif len(key) == 1 and key.isdigit():  # КФО (N)
-            current_kfo = key
+            current_kfo = 0
+            current_acc = None
+        elif len(key) == 1 and key.isdigit() or (not key and not current_kfo):  # КФО (N)
+            current_kfo = key or 0
         elif key and len(key) <= 6:  # Счет (NNN.MM)
             current_acc = key
         elif len(key) <= 17:  # КПС или пусто (17N)
