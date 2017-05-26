@@ -171,6 +171,8 @@ class App(tk.Tk):
                         self.report.print('  --- | %15.2f | %15.2f | %15.2f | %15.2f | ...' % tuple(diff[0]))
                         self.report.print('  +++ | %15.2f | %15.2f | %15.2f | %15.2f | ...' % tuple(diff[1]))
                         self.report.print()
+            
+            self.report.print()
 
     def bt_save_report(self):
         if not any(part.get(1.0, tk.END).strip() for part in self.reports):
