@@ -60,7 +60,7 @@ def load_osv_1c(rows: Sequence):
             current_dep = key
             current_kfo = 0
             current_acc = None
-        elif len(key) == 1 and key.isdigit() or (not key and not current_kfo):  # КФО (N)
+        elif len(key) == 1 and key.isdigit() or (not key and not current_kfo and not current_acc):  # КФО (N)
             current_kfo = key or 0
         elif key and len(key) <= 6:  # Счет (NNN.MM)
             current_acc = key
