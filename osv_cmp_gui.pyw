@@ -149,14 +149,24 @@ class App(tk.Tk):
             if not diff_records:
                 self.report.print('Различий нет.')
             else:
-                for acc, (absent, new) in diff_records.items():
+                for acc, (old, new) in diff_records.items():
                     self.report.print('%s:' % acc)
 
-                    s = set(('-', item, tuple(values[:4])) for item, values in absent.items()) | \
-                        set(('+', item, tuple(values[:4])) for item, values in new.items())
+                    def format_line(key, values):
+                        return ' %-30r [%s, ...]' % (key, ', '.join('%12.2f' % n for n in values))
 
-                    for sign, item, values in sorted(s, key=lambda x: (-ord(x[0]), str(x[1]))):
-                        self.report.print(' %s %-30r [%s, ...]' % (sign, item, ', '.join('%12.2f' % n for n in values)))
+                    s = set((key, tuple(values[:4])) for key, values in old.items()) | \
+                        set((key, tuple(values[:4])) for key, values in new.items())
+
+                    self.report.print(' Было:')
+
+                    for key, values in sorted(old.items(), key=lambda x: str(x[0])):
+                        self.report.print(format_line(key, values[:4]))
+
+                    self.report.print(' Стало:')
+
+                    for key, values in sorted(new.items(), key=lambda x: str(x[0])):
+                        self.report.print(format_line(key, values[:4]))
 
             self.report.print('-' * 80)
 
