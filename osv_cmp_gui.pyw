@@ -155,20 +155,19 @@ class App(tk.Tk):
                     def format_line(key, values):
                         return ' %-30r [%s, ...]' % (key, ', '.join('%12.2f' % n for n in values))
 
-                    s = set((key, tuple(values[:4])) for key, values in old.items()) | \
-                        set((key, tuple(values[:4])) for key, values in new.items())
-
+                    self.report.print('-' * 110)
                     self.report.print(' Было:')
 
                     for key, values in sorted(old.items(), key=lambda x: str(x[0])):
                         self.report.print(format_line(key, values[:4]))
 
+                    self.report.print('-' * 110)
                     self.report.print(' Стало:')
 
                     for key, values in sorted(new.items(), key=lambda x: str(x[0])):
                         self.report.print(format_line(key, values[:4]))
 
-            self.report.print('-' * 80)
+            self.report.print('=' * 110)
 
     def bt_save_report(self):
         if not any(part.get(1.0, tk.END).strip() for part in self.reports):
