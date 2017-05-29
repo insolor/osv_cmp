@@ -155,9 +155,9 @@ class App(tk.Tk):
                     s = set(('-', item, tuple(values[:4])) for item, values in absent.items()) | \
                         set(('+', item, tuple(values[:4])) for item, values in new.items())
 
-                    for sign, item, values in sorted(s, key=lambda x: (x[2], -ord(x[0]), x[1])):
+                    for sign, item, values in sorted(s, key=lambda x: (-ord(x[0]))):
                         self.report.print(' %s %-30r [%s, ...]' % (sign, item, ', '.join('%.2f' % n for n in values)))
-            
+
             self.report.print('-' * 80)
 
     def bt_save_report(self):
