@@ -142,7 +142,7 @@ class App(tk.Tk):
                     for item in diffs['accs'][i]:
                         self.report.print('%s %r' % (sign, item))
                         for subrecord, values in self.osv[i][department[i]][item].items():
-                            self.report.print('   %-22r [%s]' % (subrecord, ', '.join('%.2f' % n for n in values)))
+                            self.report.print('   %-22r [%s]' % (subrecord, ', '.join('%12.2f' % n for n in values)))
 
             self.report.print('\nСравнение подчиненных записей для каждого счета из исходного документа:')
             diff_records = diffs['records']
@@ -155,8 +155,8 @@ class App(tk.Tk):
                     s = set(('-', item, tuple(values[:4])) for item, values in absent.items()) | \
                         set(('+', item, tuple(values[:4])) for item, values in new.items())
 
-                    for sign, item, values in sorted(s, key=lambda x: (-ord(x[0]))):
-                        self.report.print(' %s %-30r [%s, ...]' % (sign, item, ', '.join('%.2f' % n for n in values)))
+                    for sign, item, values in sorted(s, key=lambda x: (-ord(x[0]), str(x[1]))):
+                        self.report.print(' %s %-30r [%s, ...]' % (sign, item, ', '.join('%12.2f' % n for n in values)))
 
             self.report.print('-' * 80)
 
