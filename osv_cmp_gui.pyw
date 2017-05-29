@@ -144,7 +144,7 @@ class App(tk.Tk):
                         for subrecord, values in self.osv[i][department[i]][item].items():
                             self.report.print('   %-22r [%s]' % (subrecord, ', '.join('%.2f' % n for n in values)))
 
-            self.report.print('\nСравнение набора подчиненных записей для каждого счета из исходного документа:')
+            self.report.print('\nСравнение подчиненных записей для каждого счета из исходного документа:')
             diff_records = diffs['records']
             if not diff_records:
                 self.report.print('Различий нет.')
@@ -157,20 +157,6 @@ class App(tk.Tk):
 
                     for sign, item, values in sorted(s, key=lambda x: (x[2], -ord(x[0]), x[1])):
                         self.report.print(' %s %-30r [%s, ...]' % (sign, item, ', '.join('%.2f' % n for n in values)))
-
-            self.report.print('\nСравнение сумм:')
-            diff_sums = diffs['sums']
-            if not diff_sums:
-                self.report.print('Недопустимых различий нет.')
-            else:
-                for acc, records in diff_sums.items():
-                    self.report.print('%s:' % acc)
-
-                    for record, diff in records.items():
-                        self.report.print(' %r' % record)
-                        self.report.print('  --- | %15.2f | %15.2f | %15.2f | %15.2f | ...' % tuple(diff[0]))
-                        self.report.print('  +++ | %15.2f | %15.2f | %15.2f | %15.2f | ...' % tuple(diff[1]))
-                        self.report.print()
             
             self.report.print('-' * 80)
 

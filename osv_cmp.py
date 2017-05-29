@@ -227,8 +227,17 @@ def osv_compare(*osv):
                         diffs[acc][record] = (row[:4], row2[:4])
 
     diff_sums = diffs
+
+    # Merge diff_records with diff_sums
+    for acc, diff in diff_sums.items():
+        if acc not in diff_records:
+            diff_records[acc] = (OrderedDict(), OrderedDict())
+
+        for key, (x, y) in diff.items():
+            diff_records[acc][0][key] = x
+            diff_records[acc][1][key] = y
     
-    return dict(accs=diff_accs, records=diff_records, sums=diff_sums)
+    return dict(accs=diff_accs, records=diff_records)
 
 
 def sum_lists(s: iter):
