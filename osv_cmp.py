@@ -128,17 +128,16 @@ def load_osv_smeta(rows: Sequence):
             if acc not in current_section:
                 current_section[acc] = OrderedDict()
 
-            # if key:
-                # if '.' not in key:
-                    # log.append("КБК %r без точек в счете %s, строка #%d. "
-                               # "Необходимо заполнить поля данного КБК в Смете-СМАРТ." % (key, acc, i + 1))
+            if key:
+                if '.' not in key:
+                    log.append("КБК %r без точек в счете %s, строка #%d. " % (key, acc, i + 1))
 
-                # if len(key_plain) == 17:
-                    # log.append("Слишком короткий (старый) КБК: '%s' (%d цифр) в счете %s, строка #%d" %
-                               # (key, len(key_plain), acc, i + 1))
-                # elif len(key_plain) < 20:
-                    # log.append("Слишком короткий КБК: '%s' (%d цифр) в счете %s, строка #%d" %
-                               # (key, len(key_plain), acc, i + 1))
+                if len(key_plain) == 17:
+                    log.append("Слишком короткий (старый) КБК: '%s' (%d цифр) в счете %s, строка #%d" %
+                               (key, len(key_plain), acc, i + 1))
+                elif len(key_plain) < 20:
+                    log.append("Слишком короткий КБК: '%s' (%d цифр) в счете %s, строка #%d" %
+                               (key, len(key_plain), acc, i + 1))
             
             head = key.partition('.')[0]
             if len(head) == 3:
