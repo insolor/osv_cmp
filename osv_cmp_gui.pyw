@@ -4,9 +4,8 @@ import tkinter.ttk as ttk
 import xlrd
 import re
 
-from tkinter import filedialog
-from tkinter import messagebox
-from osv_cmp import load_osv_smeta, load_osv_1c, check_format, osv_compare, osv_sum
+from tkinter import filedialog, messagebox
+from osv_cmp import load_osv_smeta, load_osv_1c, check_format, osv_compare, osv_sum, sum_lists
 
 
 class Report(tk.Text):
@@ -154,17 +153,21 @@ class App(tk.Tk):
                     self.report.print('%s:' % acc)
 
                     def format_line(key, values):
-                        return '%-30r [%s, ...]' % (key, ', '.join('%12.2f' % n for n in values))
+                        return '%-30s [%s, ...]' % (key, ', '.join('%12.2f' % n for n in values))
 
                     self.report.print(' Было:')
 
                     for key, values in sorted(old.items(), key=lambda x: str(x[0])):
-                        self.report.print('  ' + format_line(key, values[:4]))
+                        self.report.print('  ' + format_line(repr(key), values[:4]))
 
                     self.report.print(' Стало:')
 
                     for key, values in sorted(new.items(), key=lambda x: str(x[0])):
-                        self.report.print('  ' + format_line(key, values[:4]))
+                        self.report.print('  ' + format_line(repr(key), values[:4]))
+
+                    self.report.print(' Разница:')
+                    diff = [x - y for x, y in zip(sum_lists(iter(new.values())), sum_lists(iter(old.values())))]
+                    self.report.print('  ' + format_line('', diff))
 
             self.report.print('=' * 110)
 
