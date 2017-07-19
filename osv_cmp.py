@@ -42,7 +42,7 @@ def load_osv_1c(rows: Sequence):
     data_dict = OrderedDict()
     current_dep = ''
     current_kfo = 0
-    current_acc = None
+    current_acc = ''  # type: str
     
     start = None
     for i, row in enumerate(rows):
@@ -53,13 +53,13 @@ def load_osv_1c(rows: Sequence):
     for i, row in enumerate(rows[start:]):
         key = row[0]  # type: str
         row = [float(item) if item else 0.0 for item in (row[3], row[6], row[9], row[14], row[16], row[19])]
-        assert current_acc is None or 'None' not in current_acc, 'Line #%d' % i
+        assert not current_acc or 'None' not in current_acc, 'Line #%d' % i
         if key == 'Итого':
             break
         elif (' ' in key or key.isalpha()) and key not in {'НД', 'ОКД'}:  # Наименование учреждения
             current_dep = key
             current_kfo = 0
-            current_acc = None
+            current_acc = ''
         elif len(key) == 1 and key.isdigit() or (not key and not current_kfo and not current_acc):  # КФО (N)
             current_kfo = key or 0
         elif key and len(key) <= 6:  # Счет (NNN.MM)
@@ -91,7 +91,7 @@ def load_osv_smeta(rows: Sequence):
     log = []
     data_dict = OrderedDict()
     current_dep = ''
-    current_acc = None
+    current_acc = ''  # type: str
     heads = set()
 
     start = None
@@ -113,7 +113,7 @@ def load_osv_smeta(rows: Sequence):
         elif parts <= 3 and 1 < len(key_plain) < 17:  # Счет 6 знаков (N.MMM.KK)
             current_acc = key
         else:  # КБК или пусто (могут быть цифры, буквы, разделенные или не разделенные точками)
-            if current_acc is None:
+            if not current_acc:
                 log.append("Не удалось определить текущий счет, строка #%d.\n"
                            "Возможно, при формировании оборотно-сальдовой ведомости не были выбраны "
                            "необходимые пункты группировки. Загрузка прервана." % (i + 1))
