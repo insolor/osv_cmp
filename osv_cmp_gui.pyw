@@ -164,10 +164,13 @@ class App(tk.Tk):
 
                     for key, values in sorted(new.items(), key=lambda x: str(x[0])):
                         self.report.print('  ' + format_line(repr(key), values[:4]))
-
-                    self.report.print(' Разница:')
+                    
                     diff = [x - y for x, y in zip(sum_lists(iter(new.values())), sum_lists(iter(old.values())))]
-                    self.report.print('  ' + format_line('', diff))
+                    if any(abs(x) >= 0.01 for x in diff[:4]):
+                        self.report.print(' Разница:')
+                        self.report.print('  ' + format_line('', diff[:4]))
+                    else:
+                        self.report.print(' Разницы по сумме нет.')
 
             self.report.print('=' * 110)
 
