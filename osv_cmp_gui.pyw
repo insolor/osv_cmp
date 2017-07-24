@@ -3,6 +3,8 @@ import tkinter as tk
 import tkinter.ttk as ttk
 import xlrd
 import re
+import sys
+from io import StringIO
 
 from tkinter import filedialog, messagebox
 from osv_cmp import load_osv_smeta, load_osv_1c, check_format, osv_compare, osv_sum, sum_lists
@@ -187,6 +189,14 @@ class App(tk.Tk):
             except PermissionError:
                 messagebox.showerror('Ошибка доступа', 'Не удалось сохранить отчет: ошибка доступа')
     
+    def check_stderr(self):
+        text = self.stderr.getvalue()
+        if text:
+            messagebox.showerror('Необработанное исключение', text)
+            text.truncate()
+        
+        self.after(100, self.check_stderr)
+    
     def __init__(self):
         def init_header(parent):
             self.entry = [ttk.Entry(parent, width=100) for _ in range(2)]
@@ -233,6 +243,10 @@ class App(tk.Tk):
             return notebook
 
         super().__init__()
+        
+        self.stderr = StringIO()
+        sys.stderr = self.stderr
+        self.check_stderr()
         
         header = tk.Frame()
         header.pack(side='top', fill='x')
