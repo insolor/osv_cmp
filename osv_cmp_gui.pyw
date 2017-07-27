@@ -168,7 +168,7 @@ class App(tk.Tk):
                         self.report.print('  ' + format_line(repr(key), values[:4]))
                     
                     diff = [x - y for x, y in zip(sum_lists(iter(new.values())), sum_lists(iter(old.values())))]
-                    if any(abs(x) >= 0.01 for x in diff[:4]):
+                    if any(abs(x) > 0.009 for x in diff[:4]):
                         self.report.print(' Разница:')
                         self.report.print('  ' + format_line('', diff[:4]))
                     else:
