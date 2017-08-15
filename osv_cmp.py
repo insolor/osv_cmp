@@ -223,7 +223,7 @@ def osv_compare(*osv):
                         if acc not in diffs:
                             diffs[acc] = OrderedDict()
                         
-                        diffs[acc][record] = (row[:4], row2[:4])
+                        diffs[acc][record] = (row, row2)
 
     diff_sums = diffs
 
