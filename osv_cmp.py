@@ -240,11 +240,14 @@ def osv_compare(*osv):
 
 
 def sum_lists(s: iter):
-    x = list(next(s))
-    for row in s:
-        assert len(x) == len(row), "Row lengths must be the same: {} <> {}".format(x, row)
-        for i, item in enumerate(row):
-            x[i] += item
+    try:
+        x = list(next(s))
+        for row in s:
+            assert len(x) == len(row), "Row lengths must be the same: {} <> {}".format(x, row)
+            for i, item in enumerate(row):
+                x[i] += item
+    except StopIteration:
+        x = []
     return x
 
 

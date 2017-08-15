@@ -6,6 +6,7 @@ import re
 import sys
 from os import path
 from io import StringIO
+from itertools import zip_longest
 
 from tkinter import filedialog, messagebox
 from osv_cmp import load_osv_smeta, load_osv_1c, check_format, osv_compare, osv_sum, sum_lists
@@ -168,7 +169,7 @@ class App(tk.Tk):
                     for key, values in sorted(new.items(), key=lambda x: str(x[0])):
                         self.report.print('  ' + format_line(repr(key), values[:4]))
                     
-                    diff = [x - y for x, y in zip(sum_lists(iter(new.values())), sum_lists(iter(old.values())))]
+                    diff = [x - y for x, y in zip_longest(sum_lists(iter(new.values())), sum_lists(iter(old.values())), fillvalue=0.0)]
                     if any(abs(x) > 0.009 for x in diff[:4]):
                         self.report.print(' Разница:')
                         self.report.print('  ' + format_line('', diff[:4]))
