@@ -4,6 +4,7 @@ import tkinter.ttk as ttk
 import xlrd
 import re
 import sys
+from os import path
 from io import StringIO
 
 from tkinter import filedialog, messagebox
@@ -244,9 +245,11 @@ class App(tk.Tk):
 
         super().__init__()
         
-        self.stderr = StringIO()
-        sys.stderr = self.stderr
-        self.check_stderr()
+        executable = path.split(sys.executable)[1]
+        if executable.startswith('pythonw') or not executable.startswith('python'):  # if no console attached
+            self.stderr = StringIO()
+            sys.stderr = self.stderr
+            self.check_stderr()
         
         header = tk.Frame()
         header.pack(side='top', fill='x')
