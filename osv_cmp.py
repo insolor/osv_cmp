@@ -1,6 +1,8 @@
 from collections import OrderedDict
 from collections.abc import *
+from decimal import Decimal, getcontext
 
+getcontext().prec = 2
 
 class KBK:
     def __init__(self, s, suffix=''):
@@ -52,7 +54,7 @@ def load_osv_1c(rows: Sequence):
     
     for i, row in enumerate(rows[start:]):
         key = row[0]  # type: str
-        row = [float(item) if item else 0.0 for item in (row[3], row[6], row[9], row[14], row[16], row[19])]
+        row = [Decimal(item) if item else Decimal(0) for item in (row[3], row[6], row[9], row[14], row[16], row[19])]
         assert not current_acc or 'None' not in current_acc, 'Line #%d' % i
         if key == 'Итого':
             break
@@ -154,7 +156,7 @@ def load_osv_smeta(rows: Sequence):
                     candidate = KBK(key, '(%s)' % j)
                 key = candidate
             
-            current_section[acc][key] = [float(item) for item in row[1:]]
+            current_section[acc][key] = [Decimal(item) for item in row[1:]]
 
     log.append("Коды главы в оборотно-сальдовой ведомости: {}\n".format(', '.join(heads)))
     return data_dict, log
@@ -204,9 +206,6 @@ def osv_compare(*osv):
             diffs[acc] = symm_diff_dicts(records[0], records[1])
     diff_records = diffs
     
-    def money_is_equal(x, y, eps=0.001):
-        return abs(x - y) < eps
-    
     # Compare sums
     diffs = OrderedDict()
     for acc in osv[0]:
@@ -216,8 +215,8 @@ def osv_compare(*osv):
                     row2 = osv[1][acc][record]
                     if row[:4] == row2[:4]:
                         continue
-                    elif (money_is_equal(row[0]-row[1], row2[0]-row2[1]) and
-                          money_is_equal(row[2]-row[3], row2[2]-row2[3])):
+                    elif (row[0]-row[1] == row2[0]-row2[1] and
+                          row[2]-row[3] == row2[2]-row2[3]):
                         continue
                     else:
                         if acc not in diffs:
