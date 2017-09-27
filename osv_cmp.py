@@ -77,10 +77,10 @@ def load_osv_1c(rows: Sequence):
             if key in current_section[acc]:
                 log.append("Дублирующуяся запись %r в счете %s, строка #%d" % (key, acc, i + 1))
                 j = 1
-                candidate = '%s_%d' % (key, j)
+                candidate = '%s(%d)' % (key, j)
                 while candidate in current_section[acc]:
                     j += 1
-                    candidate = '%s_%d' % (key, j)
+                    candidate = '%s(%d)' % (key, j)
                 key = candidate
             current_section[acc][key] = row
 
