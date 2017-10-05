@@ -1,8 +1,7 @@
 from collections import OrderedDict
 from collections.abc import *
-from decimal import Decimal, getcontext
+from decimal import Decimal
 
-getcontext().prec = 2
 
 class KBK:
     def __init__(self, s, suffix=''):

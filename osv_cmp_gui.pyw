@@ -10,9 +10,8 @@ from itertools import zip_longest
 
 from tkinter import filedialog, messagebox
 from osv_cmp import load_osv_smeta, load_osv_1c, check_format, osv_compare, osv_sum, sum_lists
-from decimal import Decimal, getcontext
+from decimal import Decimal
 
-getcontext().prec = 2
 
 class Report(tk.Text):
     def __init__(self, *args, **kwargs):
@@ -172,7 +171,7 @@ class App(tk.Tk):
                         self.report.print('  ' + format_line(repr(key), values[:4]))
                     
                     diff = [x - y for x, y in zip_longest(sum_lists(iter(new.values())), sum_lists(iter(old.values())), fillvalue=Decimal('0.0'))]
-                    if any(abs(x) > 0.009 for x in diff[:4]):
+                    if any(x for x in diff[:4]):
                         self.report.print(' Разница:')
                         self.report.print('  ' + format_line('', diff[:4]))
                     else:
