@@ -160,20 +160,20 @@ class App(tk.Tk):
                     def format_line(key, values):
                         return '%-30s [%s, ...]' % (key, ', '.join('%12.2f' % n for n in values))
 
-                    self.report.print(' Было:')
+                    if True:
+                        self.report.print(' Было:')
 
-                    for key, values in sorted(old.items(), key=lambda x: str(x[0])):
-                        self.report.print('  ' + format_line(repr(key), values[:4]))
+                        for key, values in sorted(old.items(), key=lambda x: str(x[0])):
+                            self.report.print(format_line('  ' + repr(key), values[:4]))
 
-                    self.report.print(' Стало:')
+                        self.report.print(' Стало:')
 
-                    for key, values in sorted(new.items(), key=lambda x: str(x[0])):
-                        self.report.print('  ' + format_line(repr(key), values[:4]))
+                        for key, values in sorted(new.items(), key=lambda x: str(x[0])):
+                            self.report.print(format_line('  ' + repr(key), values[:4]))
                     
                     diff = [x - y for x, y in zip_longest(sum_lists(iter(new.values())), sum_lists(iter(old.values())), fillvalue=Decimal('0.0'))]
                     if any(x for x in diff[:4]):
-                        self.report.print(' Разница:')
-                        self.report.print('  ' + format_line('', diff[:4]))
+                        self.report.print(format_line(' Разница:  ', diff[:4]))
                     else:
                         self.report.print(' Разницы по сумме нет.')
 
