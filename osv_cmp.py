@@ -155,7 +155,7 @@ def load_osv_smeta(rows: Sequence):
                     candidate = KBK(key, '(%s)' % j)
                 key = candidate
             
-            current_section[acc][key] = [Decimal(item) for item in row[1:]]
+            current_section[acc][key] = [Decimal(item) for item in row[1:7]]
 
     log.append("Коды главы в оборотно-сальдовой ведомости: {}\n".format(', '.join(heads)))
     return data_dict, log
