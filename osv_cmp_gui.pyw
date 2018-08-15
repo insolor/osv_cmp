@@ -160,7 +160,7 @@ class App(tk.Tk):
                     def format_line(key, values):
                         return '%-30s [%s, ...]' % (key, ', '.join('%12.2f' % n for n in values))
 
-                    if True:
+                    if not self.var_dont_show_kbk_difference.get():
                         self.report.print(' Было:')
 
                         for key, values in sorted(old.items(), key=lambda x: str(x[0])):
@@ -221,6 +221,10 @@ class App(tk.Tk):
 
             button = ttk.Button(parent, text='Сравнить', command=self.bt_compare)
             button.grid(column=4, row=0, rowspan=2, sticky=tk.NS)
+
+            self.var_dont_show_kbk_difference = tk.BooleanVar()
+            chk = ttk.Checkbutton(parent, text="Не отображать разницу по КБК", variable=self.var_dont_show_kbk_difference)
+            chk.grid(columnspan=2, sticky=tk.W)
         
         def init_report_area(parent):
             scrollbar = ttk.Scrollbar(parent)
