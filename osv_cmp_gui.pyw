@@ -178,6 +178,8 @@ class App(tk.Tk):
                         self.report.print(' Разницы по сумме нет.')
 
             self.report.print('=' * 110)
+            self.report.print('Сравнение завершено')
+            
 
     def bt_save_report(self):
         if not any(part.get(1.0, tk.END).strip() for part in self.reports):
