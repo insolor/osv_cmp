@@ -11,7 +11,6 @@ from itertools import zip_longest
 from tkinter import filedialog, messagebox
 from osv_cmp import load_osv_smeta, load_osv_1c, check_format, osv_compare, osv_sum, sum_lists
 from decimal import Decimal
-from collections import Counter
 
 
 class Report(tk.Text):
@@ -130,8 +129,6 @@ class App(tk.Tk):
 
         self.notebook.select(2)
         self.report.clear()
-
-        #from itertools import zip_longest
 
         if self.var_compare_dep_names.get():
             departments = set(self.osv[0]) & set(self.osv[1])
