@@ -134,8 +134,7 @@ class App(tk.Tk):
         #from itertools import zip_longest
 
         if self.var_compare_dep_names.get():
-            departments = {dep for dep, count in Counter(list(self.osv[0]) + list(self.osv[1])).items() if count > 1}
-            #departments = set(self.osv[0]) ^ set(self.osv[1])  # Why doesn't it work?
+            departments = set(self.osv[0]) & set(self.osv[1])
             osv_deps = [[dep_name for dep_name in self.osv[0] if dep_name in departments] for _ in self.osv]  # The same list multiple times
         else:
             osv_deps = self.osv
