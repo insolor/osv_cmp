@@ -11,6 +11,7 @@ from itertools import zip_longest
 from tkinter import filedialog, messagebox
 from osv_cmp import load_osv_smeta, load_osv_1c, check_format, osv_compare, osv_sum, sum_lists
 from decimal import Decimal
+from collections import Counter
 
 
 class Report(tk.Text):
@@ -130,7 +131,16 @@ class App(tk.Tk):
         self.notebook.select(2)
         self.report.clear()
 
-        for department in zip(*self.osv):
+        #from itertools import zip_longest
+
+        if self.var_compare_dep_names.get():
+            departments = {dep for dep, count in Counter(list(self.osv[0]) + list(self.osv[1])).items() if count > 1}
+            #departments = set(self.osv[0]) ^ set(self.osv[1])  # Why doesn't it work?
+            osv_deps = [[dep_name for dep_name in self.osv[0] if dep_name in departments] for _ in self.osv]  # The same list multiple times
+        else:
+            osv_deps = self.osv
+
+        for department in zip(*osv_deps):
             if department[0]:
                 self.report.print('Учреждение 1: ' + department[0])
                 self.report.print('Учреждение 2: ' + department[1])
@@ -179,7 +189,6 @@ class App(tk.Tk):
 
             self.report.print('=' * 110)
             self.report.print('Сравнение завершено')
-            
 
     def bt_save_report(self):
         if not any(part.get(1.0, tk.END).strip() for part in self.reports):
@@ -224,6 +233,11 @@ class App(tk.Tk):
 
             self.var_dont_show_kbk_difference = tk.BooleanVar()
             chk = ttk.Checkbutton(parent, text="Не отображать разницу по КБК", variable=self.var_dont_show_kbk_difference)
+            chk.grid(columnspan=2, sticky=tk.W)
+
+            self.var_compare_dep_names = tk.BooleanVar()
+            chk = ttk.Checkbutton(parent, text="Точное совпадение наименования учреждения (учреждения, которых нет в одном из файлов, будут пропущены)",
+                                  variable=self.var_compare_dep_names)
             chk.grid(columnspan=2, sticky=tk.W)
         
         def init_report_area(parent):
