@@ -58,7 +58,7 @@ def load_osv_1c(rows: Sequence):
         if key == 'Итого':
             break
         elif (' ' in key or key.isalpha()) and key not in {'НД', 'НПВ', 'ОЦИ', 'НЕ'}:  # Наименование учреждения
-            current_dep = key
+            current_dep = key.strip()
             current_kfo = 0
             current_acc = ''
         elif len(key) == 1 and key.isdigit() or (not key and not current_kfo and not current_acc):  # КФО (N)
@@ -108,7 +108,7 @@ def load_osv_smeta(rows: Sequence):
         if key.startswith('Итого'):
             break
         elif ' ' in key or key.isalpha():  # Наименование учреждения
-            current_dep = key
+            current_dep = key.strip()
         elif len(key) == 1 and key.isdigit():  # КФО (N)
             pass
         elif parts <= 3 and 1 < len(key_plain) < 17:  # Счет 6 знаков (N.MMM.KK)
