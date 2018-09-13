@@ -203,7 +203,7 @@ class App(tk.Tk):
         text = self.stderr.getvalue()
         if text:
             messagebox.showerror('Необработанное исключение', text)
-            text.truncate()
+            self.stderr.truncate()
         
         self.after(100, self.check_stderr)
     
