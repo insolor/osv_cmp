@@ -11,6 +11,7 @@ from itertools import zip_longest
 from tkinter import filedialog, messagebox
 from osv_cmp import load_osv_smeta, load_osv_1c, check_format, osv_compare, osv_sum, sum_lists
 from decimal import Decimal
+from pprint import pformat
 
 
 class Report(tk.Text):
@@ -79,7 +80,7 @@ class App(tk.Tk):
         
         self.reports[i].print("Файл загружен.")
         self.reports[i].print("Загружено учреждений: %d" % len(osv))
-        self.reports[i].print(list(osv.keys()))
+        self.reports[i].print(pformat(list(osv.keys()), width=110))
         self.reports[i].print("Всего счетов: %d" % sum(len(accounts) for accounts in osv.values()))
         self.reports[i].print("Всего подчиненных записей: %d" %
                               sum(len(records) for accounts in osv.values() for records in accounts.values()))
@@ -133,7 +134,8 @@ class App(tk.Tk):
         if self.var_compare_dep_names.get():
             departments = set(self.osv[0]) & set(self.osv[1])
             self.report.print('Количество сравниваемых учреждений:', len(departments))
-            self.report.print('Не попали учреждения:', sorted(set(self.osv[0]) ^ set(self.osv[1])))
+            self.report.print('Не попали учреждения:')
+            self.report.print(pformat(sorted(set(self.osv[0]) ^ set(self.osv[1])), width=110))
             self.report.print()
             osv_deps = [[dep_name for dep_name in self.osv[0] if dep_name in departments] for _ in self.osv]  # The same list multiple times
         else:
