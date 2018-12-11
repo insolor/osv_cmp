@@ -57,7 +57,7 @@ def load_osv_1c(rows: Sequence):
         assert not current_acc or 'None' not in current_acc, 'Line #%d' % i
         if key == 'Итого':
             break
-        elif (' ' in key or key.isalpha()) and key not in {'НД', 'НПВ', 'ОЦИ', 'НЕ'}:  # Наименование учреждения
+        elif (' ' in key or key.isalpha()) and len(key) > 3:  # Наименование учреждения
             current_dep = key.strip()
             current_kfo = 0
             current_acc = ''
@@ -76,7 +76,7 @@ def load_osv_1c(rows: Sequence):
                 current_section[acc] = OrderedDict()
 
             if key in current_section[acc]:
-                log.append("Дублирующуяся запись %r в счете %s, строка #%d" % (key, acc, i + 1))
+                log.append("Дублирующаяся запись %r в счете %s, строка #%d" % (key, acc, i + 1))
                 j = 1
                 candidate = '%s(%d)' % (key, j)
                 while candidate in current_section[acc]:
