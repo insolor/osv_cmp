@@ -38,6 +38,29 @@ class KBK:
         return self.normalized.__hash__()
 
 
+def is_subaccount(acc1, acc2):
+    if acc1 == acc2:
+        return True
+    
+    acc1 = acc1.split('.')
+    acc2 = acc2.split('.')
+
+    if acc1[0] != acc2[0]:
+        return False
+
+    if len(acc1) == 1:
+        return acc1[0] == acc2[0]  # XXX and XXX.YZ
+    
+    acc1 = acc1[1]
+    acc2 = acc2[1]
+
+    # Дальше считаем, что в субсчете максимум 2 цифры
+    if acc1[0] == '0':  # XXX.0(0) and XXX.YZ
+        return True
+
+    return acc1[0] == acc2[0] and acc1[1] == '0'  # XXX.Y0 and XXX.YZ
+
+
 def load_osv_1c(rows: Sequence):
     log = []
     data_dict = OrderedDict()
@@ -46,26 +69,67 @@ def load_osv_1c(rows: Sequence):
     current_acc = ''  # type: str
     
     start = None
+    bgu_version = 1
     for i, row in enumerate(rows):
+        # В БГУ 1.0 "Сальдо на начало периода" в 4-й колонке (индекс 3)
+        # В БГУ 2.0 "Сальдо на начало периода" в 5-й колонке (индекс 4)
+        if row[4] == 'Сальдо на начало периода':
+            bgu_version = 2
+        
         if row[0] == 'КПС':
             start = i+1
             break
     
+    prev_row = None
+    kps = True
     for i, row in enumerate(rows[start:]):
+        def add_line_without_kps():
+            nonlocal kps
+            if current_dep not in data_dict:
+                data_dict[current_dep] = OrderedDict()
+            
+            current_section = data_dict[current_dep]
+
+            acc = '%s.%s' % (current_kfo, current_acc)
+            if acc not in current_section:
+                current_section[acc] = OrderedDict()
+            
+            current_section[acc][''] = prev_row
+            kps = True
+
         key = row[0]  # type: str
-        row = [Decimal(item) if item else Decimal(0) for item in (row[3], row[6], row[9], row[14], row[16], row[19])]
+
+        if bgu_version == 1:
+            row = [Decimal(item) if item else Decimal(0) for item in (row[3], row[6], row[9], row[14], row[16], row[19])]
+        else:
+            row = [Decimal(item) if item else Decimal(0) for item in (row[4], row[7], row[10], row[15], row[17], row[20])]
+        
         assert not current_acc or 'None' not in current_acc, 'Line #%d' % i
         if key == 'Итого':
+            if not kps:  # Если был счет, но в нем не было подчиненных КПС
+                add_line_without_kps()
+            
             break
         elif (' ' in key or key.isalpha()) and len(key) > 3:  # Наименование учреждения
+            if not kps:
+                add_line_without_kps()
+            
             current_dep = key.strip()
             current_kfo = 0
             current_acc = ''
         elif len(key) == 1 and key.isdigit() or (not key and not current_kfo and not current_acc):  # КФО (N)
+            if not kps:
+                add_line_without_kps()
+
             current_kfo = key or 0
         elif key and len(key) <= 6:  # Счет (NNN.MM)
+            if not kps and not is_subaccount(current_acc, key):
+                add_line_without_kps()
+
             current_acc = key
+            kps = False
         elif len(key) <= 17:  # КПС или пусто (17N)
+            kps = True
             if current_dep not in data_dict:
                 data_dict[current_dep] = OrderedDict()
 
@@ -84,6 +148,8 @@ def load_osv_1c(rows: Sequence):
                     candidate = '%s(%d)' % (key, j)
                 key = candidate
             current_section[acc][key] = row
+
+        prev_row = row
 
     return data_dict, log
 
