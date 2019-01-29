@@ -148,16 +148,17 @@ class App(tk.Tk):
 
             diffs = osv_compare(self.osv[0][department[0]], self.osv[1][department[1]])
 
-            if not diffs['accs']:
-                self.report.print('Различий в наборе загруженных счетов нет.')
-            else:
-                self.report.print('Различия в наборе счетов:')
+            if 'accs' in diffs:
+                if not diffs['accs']:
+                    self.report.print('Различий в наборе загруженных счетов нет.')
+                else:
+                    self.report.print('Различия в наборе счетов:')
 
-                for i, sign in enumerate(('-', '+')):
-                    for item in diffs['accs'][i]:
-                        self.report.print('%s %r' % (sign, item))
-                        for subrecord, values in self.osv[i][department[i]][item].items():
-                            self.report.print('   %-22r [%s]' % (subrecord, ', '.join('%12.2f' % n for n in values)))
+                    for i, sign in enumerate(('-', '+')):
+                        for item in diffs['accs'][i]:
+                            self.report.print('%s %r' % (sign, item))
+                            for subrecord, values in self.osv[i][department[i]][item].items():
+                                self.report.print('   %-22r [%s]' % (subrecord, ', '.join('%12.2f' % n for n in values)))
 
             self.report.print('\nСравнение подчиненных записей для каждого счета из исходного документа:')
             diff_records = diffs['records']

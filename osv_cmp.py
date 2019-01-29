@@ -299,8 +299,16 @@ def osv_compare(*osv):
         for key, (x, y) in diff.items():
             diff_records[acc][0][key] = x
             diff_records[acc][1][key] = y
+
+    # Merge diff_accs into diff_records
+    for acc in diff_accs[0]:
+        diff_records[acc] = [osv[0][acc], OrderedDict()]
     
-    return dict(accs=diff_accs, records=diff_records)
+    for acc in diff_accs[1]:
+        diff_records[acc] = [OrderedDict(), osv[1][acc]]
+    
+    #return dict(accs=diff_accs, records=diff_records)
+    return dict(records=diff_records)
 
 
 def sum_lists(s: iter):
